@@ -13,8 +13,17 @@
 //#include "dtypes.h"
 
 class TBMSCom{
+    static const   int MIN_FRAME_SPACE=4;
+    static const   int RXBUFER_LEN=40;
+    byte m_rxBuf[RXBUFER_LEN];
+    byte m_rxBufSH[RXBUFER_LEN];
+    HardwareSerial * m_serialPtr;
+    int m_newRxDatalen;
+    int m_rxIndex;
+    byte m_previousTime;
+
     public:
-    TBMSCom();
+    //TBMSCom();
     /**
     * Must be called from main
     */ 
@@ -62,10 +71,12 @@ class TBMSCom{
         // frame 10
         // frame 17       
 
-    };
-    int init(HardwareSerial * uart);
+    }m_data;
+    
     void main();    
     void getData(Data * ptr);
+    void serialEvent();
+    void init(HardwareSerial * uart);
 };
 
 #endif //tbmscom_hpp

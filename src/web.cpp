@@ -9,8 +9,10 @@
 
 #include "web.h"
 #include "Global.h"
+#include "tbmscom.hpp"
 //#include "Params.h" 
 #include <ESP8266HTTPUpdateServer.h>
+#include "Global.h"
 //#include <FS.h>
 
 const char Update_page[] PROGMEM = R"=====(
@@ -25,6 +27,9 @@ ESP8266HTTPUpdateServer HttpUpdater;
 
 void handleNotFound();
 void handleRoot();
+void handle_preupdate();
+void handle_log();
+
 /*
 void handleCmd();
 void handle_ext_info();
@@ -33,7 +38,7 @@ void handle_setP();
 void handle_showP();
 void handle_setDefP();
 void handle_reset();
-void handle_preupdate();
+
 void handle_help();
 void sendFilePage(String pagefileName);
 void handleFileUpload();                // upload a new file to the SPIFFS
@@ -44,6 +49,9 @@ void web_init() {
   
     WebServer.on("/", handleRoot);
     WebServer.onNotFound(handleNotFound);
+    WebServer.on("/preupdate",  handle_preupdate);  
+    WebServer.on("/log",  handle_log);
+
     /*
     WebServer.on("/help", handle_help);
     WebServer.on("/cmd", handleCmd);
@@ -55,8 +63,7 @@ void web_init() {
     WebServer.on("/showP",  handle_showP); 
     WebServer.on("/setDefP",  handle_setDefP); 
     WebServer.on("/reset",  handle_reset); 
-    WebServer.on("/preupdate",  handle_preupdate); 
-    
+      
     WebServer.on("/upload", HTTP_GET, []() {                  // if the client requests the upload page
       String s = Update_page;
       WebServer.send(200, "text/html", s);
@@ -90,14 +97,78 @@ void handleNotFound(){
   WebServer.send(404, "text/plain", message);
 }
 
+void addOneLine(String  &mes,String name,float value){
+  mes+=name + value + (String)"\n";
+}
+
 void handleRoot() {
   String message = "BMSCom diag status:\n";
+  message +=SW_VERSION; message +="\n";
+  message +="Comp - date/time= "; message +=COMP_DATE; message +="/"; message +=COMP_TIME; message +="\n";
+
+  addOneLine(message, "u_min=",TBMSComobj.m_data.u_min);
+  addOneLine(message, "u_max=", TBMSComobj.m_data.u_max);
+  addOneLine(message, "i_max=",TBMSComobj.m_data.i_max);
+  addOneLine(message, "i_bat=",TBMSComobj.m_data.i_bat);
+  addOneLine(message, "u_bat=",TBMSComobj.m_data.u_bat);
+  addOneLine(message, "t_max=",TBMSComobj.m_data.t_max);
+  addOneLine(message, "cell_nr=",TBMSComobj.m_data.cell_nr);
+  addOneLine(message, "ah=",TBMSComobj.m_data.ah);
+
+  addOneLine(message, "t1=",TBMSComobj.m_data.t1);
+  addOneLine(message, "t2=",TBMSComobj.m_data.t2);
+  addOneLine(message, "t3=",TBMSComobj.m_data.t3);
+  addOneLine(message, "t4=",TBMSComobj.m_data.t4);
+
+  for(int ind=0; ind < TBMSCom::Data::U_CELL_NR; ind++ ){
+    addOneLine(message, "u_cell=",TBMSComobj.m_data.u_cell[ind]);
+  }
+  message +="\n";
+  message += "Debug Info: \n";
+  message +="========================================================\n";
  
-  
+ message +="RxBuffer = "; 
+  int framLen=TBMSCom::RXBUFER_LEN;
+  byte * bufPtr=TBMSComobj.rxBuff;
+  for(int i=0;i< framLen;i++){
+    message +=  String(bufPtr[i],HEX);
+    message +=" , ";
+  }
+  message +="\n";  
+  message +="DebugCntr = "; message +=DebugCntr; message +="\n";
+  message +="LoopCntr = "; message +=LoopCntr; message +="\n";   
+  message +="LowLoopCntr = "; message +=LowLoopCntr; message +="\n"; 
+  message +="HighLoopCntr = "; message +=HighLoopCntr; message +="\n";
+  message +="ExLowLoopCntr = "; message +=ExLowLoopCntr; message +="\n"; 
+ // message +="PingErrCntr = "; message +=PingErrCntr; message +="\n"; 
+
  
   WebServer.send(200, "text/plain", message);
 }
 
+
+void handle_log(){
+  String message = "Debug Log:\n";
+  for(int index=0; index < RX_buffer_IND;index++){
+    message+=(String)RX_time[index] + (String)" | " + String(RX_buffer[index],HEX) + (String) "\n";
+  }
+  message+= (String)"RX_buffer_IND = " + RX_buffer_IND+ (String) "\n";
+  WebServer.send(200, "text/plain", message);    
+  while(Serial.available())
+    Serial.read();
+  RX_buffer_IND=0;
+  startMes = false;
+  
+}
+
+
+void handle_preupdate(){
+  
+  ITimer.disableTimer();
+  String message = "Ready for update \n"; 
+  WebServer.send(200, "text/plain", message);    
+  
+}
 
 /*
 void handleCmd(){
@@ -223,15 +294,7 @@ void handle_reset(){
   ESP.restart();
 }
 
-void handle_preupdate(){
-  
-  Status.setSafe();
-  CpuIf.m_esp.ssr_pwm_f=0; //off boyler if set
-  CpuIf.m_esp.disRESET=true;  // disable reset of ESP from UNO
-  String message = "Ready for update \n"; 
-  WebServer.send(200, "text/plain", message);    
-  
-}
+
 
 void handle_help(){
 //  sendFilePage("help.html");

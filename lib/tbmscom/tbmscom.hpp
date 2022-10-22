@@ -13,16 +13,23 @@
 //#include "dtypes.h"
 
 class TBMSCom{
-    static const   int MIN_FRAME_SPACE=4;
-    static const   int RXBUFER_LEN=40;
-    byte m_rxBuf[RXBUFER_LEN];
-    byte m_rxBufSH[RXBUFER_LEN];
+    static const   int MIN_FRAME_SPACE=6u;
+
+    
+    //byte m_rxBuf[RXBUFER_LEN];
+    //byte m_rxBufSH[RXBUFER_LEN];
     HardwareSerial * m_serialPtr;
     int m_newRxDatalen;
     int m_rxIndex;
-    byte m_previousTime;
+    int m_baudRate;
+    unsigned long m_time1;
+    int m_prev_avail;
+    bool m_startFrame;
+    bool m_seekFrameSpace;
 
     public:
+    static const   int RXBUFER_LEN=40;
+      uint8_t rxBuff[RXBUFER_LEN];
     //TBMSCom();
     /**
     * Must be called from main
@@ -45,6 +52,7 @@ class TBMSCom{
         }StateDef;
         static const int U_CELL_NR=48; // number of cells
         // frame 1
+        static const int FRAMEDATALEN=18;
         float u_min;   // [V] min voltage per cell (0.01) 
         float i_max;   // [A] max charge/discharge current (0.1)
         uint16_t ah;   // AH number ??? 
@@ -75,8 +83,9 @@ class TBMSCom{
     
     void main();    
     void getData(Data * ptr);
-    void serialEvent();
-    void init(HardwareSerial * uart);
+    void init(HardwareSerial * uart, int baudRate);
+    /* Must be called in period max 2 ms */
+    void period();
 };
 
 #endif //tbmscom_hpp

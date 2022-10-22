@@ -9,7 +9,9 @@
 
 #ifndef GLOBAL_H
 #define GLOBAL_H
-
+#include <Arduino.h>
+#include <ESP8266TimerInterrupt.h>
+#include "tbmscom.hpp"
 
 #define DEBUG_MODE
 
@@ -24,11 +26,11 @@
 #else
   #define DEBUG_PART(cs)  (void)0
 #endif
+#define CPUINTERFACE_SPEED 9600
+#define HWTIMER_PERIOD 2  //[ms] period of HW timer ISR
 
 
-
-
-//#define BUILTIN_LED_PIN     2   // internal LED
+#define BUILTIN_LED_PIN     2   // internal LED
 /*#define STATUS_LED_PIN      12    // operational status LED
 #define WIFISTATUS_LED_PIN  16    // wifi status LED
 #define WIFICONF_BUT_PIN  4       // button for WIFI conf.
@@ -43,6 +45,13 @@ extern long ExLowLoopCntr;
 extern int DebugCntr;
 extern int PingErrCntr;
 
+#define BUFFER_LEN 64
+extern int RX_buffer_IND;
+extern uint8_t RX_buffer[];
+extern uint32_t RX_time[];
+extern bool startMes;
 
+extern TBMSCom TBMSComobj; 
+extern ESP8266Timer ITimer;
 
 #endif //  GLOBAL_H

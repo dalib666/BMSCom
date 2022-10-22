@@ -7,15 +7,25 @@
 //#include "mdns.h"                //alternatice MDNS against ESP8266mDNS, possible implement also client side of MDNS
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 #include <ESP8266HTTPClient.h>
-#include "web.h""
-
-#define CPUINTERFACE_SPEED 9600
-
+#include <ESP8266TimerInterrupt.h>
+#include "web.h"
+#include "Global.h"
 
 TBMSCom TBMSComobj;  //test
 
+ESP8266Timer ITimer;
+
+void IRAM_ATTR hwTimerHandler()
+{
+  TBMSComobj.period();
+}
+
+
+
+
 void setup() {
-  TBMSComobj.init(&Serial);
+  pinMode(BUILTIN_LED_PIN, OUTPUT);
+  TBMSComobj.init(&Serial,CPUINTERFACE_SPEED);
 
   Serial.begin(CPUINTERFACE_SPEED);
   DEBUG_PART(Serial.println("Starting..."));
@@ -74,11 +84,50 @@ void setup() {
   
   //ESP.wdtDisable();   //not activated WDT to test stability, disable SW WDT to enable HW WDT -->time out is in about 4 sec 
 
+
+  // Init HW timer
+  bool startStatus = ITimer.attachInterruptInterval(HWTIMER_PERIOD * 1000, hwTimerHandler);
+  assert(startStatus);
+
+
 }
 
-void loop() {
- 
 
+uint8_t RX_buffer[BUFFER_LEN];
+uint32_t RX_time[BUFFER_LEN];
+int RX_buffer_IND=0;
+bool startMes = true;
+
+void loop() {
+  static uint32_t lastTime=0xffffffff;
+  static bool BuiltInLed=false;
+  uint32_t actTime=0;
+
+  BuiltInLed=!BuiltInLed;    
+  digitalWrite(BUILTIN_LED_PIN, BuiltInLed);  
+
+  //debug part
+/*
+  int char_ = Serial.read();
+  if(char_ >0){
+    actTime = millis();
+    if(char_== 0x1 && ((actTime - lastTime) > 6))
+      startMes=true;
+    lastTime=actTime;
+  }
+  if(startMes){
+    if(RX_buffer_IND < BUFFER_LEN){
+      if(char_ >0){
+
+          RX_time[RX_buffer_IND]=actTime;
+          RX_buffer[RX_buffer_IND]=char_;
+          RX_buffer_IND++;
+      }
+    }  
+    else  
+      startMes = false;
+  }  
+  */  
   // put your main code here, to run repeatedly:
   TBMSComobj.main();
 
@@ -86,6 +135,3 @@ void loop() {
 
 }
 
-void serialEvent(){
-  TBMSComobj.serialEvent();
-}

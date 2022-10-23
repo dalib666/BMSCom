@@ -97,9 +97,17 @@ void handleNotFound(){
   WebServer.send(404, "text/plain", message);
 }
 
-void addOneLine(String  &mes,String name,float value){
-  mes+=name + value + (String)"\n";
+void addOneLine(String  &mes,String name,int nameInd,float value, char * unit=nullptr){
+  if(unit==nullptr)
+    unit="-";  
+  mes+=name + (String)nameInd + (String)" = "+ value + (String)" " + (String)unit + (String)"\n";
 }
+void addOneLine(String  &mes,String name,float value, char * unit=nullptr){
+  if(unit==nullptr)
+    unit="-";  
+  mes+=name + (String)" = "+ value + (String)" " + (String)unit + (String)"\n";
+}
+
 
 void handleRoot() {
   String message = "BMSCom diag status:\n";
@@ -121,7 +129,8 @@ void handleRoot() {
   addOneLine(message, "t4=",TBMSComobj.m_data.t4);
 
   for(int ind=0; ind < TBMSCom::Data::U_CELL_NR; ind++ ){
-    addOneLine(message, "u_cell=",TBMSComobj.m_data.u_cell[ind]);
+
+    addOneLine(message, "u_cell",ind+1,TBMSComobj.m_data.u_cell[ind] * 1000,"mV");
   }
   message +="\n";
   message += "Debug Info: \n";

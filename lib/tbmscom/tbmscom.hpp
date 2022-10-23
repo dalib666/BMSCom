@@ -13,7 +13,7 @@
 //#include "dtypes.h"
 
 class TBMSCom{
-    static const   int MIN_FRAME_SPACE=6u;
+    static const   int MIN_FRAME_SPACE=8u;
 
     
     //byte m_rxBuf[RXBUFER_LEN];

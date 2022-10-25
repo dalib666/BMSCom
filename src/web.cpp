@@ -97,17 +97,18 @@ void handleNotFound(){
   WebServer.send(404, "text/plain", message);
 }
 
-void addOneLine(String  &mes,String name,int nameInd,float value, char * unit=nullptr){
+void addOneLine(String  &mes,const char * name,int nameInd,float value, const char * unit=nullptr){
   if(unit==nullptr)
     unit="-";  
   mes+=name + (String)nameInd + (String)" = "+ value + (String)" " + (String)unit + (String)"\n";
 }
-void addOneLine(String  &mes,String name,float value, char * unit=nullptr){
+template<class T> void addOneLine(String  &mes,const char * name,T value, const char * unit=nullptr){
   if(unit==nullptr)
     unit="-";  
   mes+=name + (String)" = "+ value + (String)" " + (String)unit + (String)"\n";
 }
-
+template void addOneLine(String  &mes,const char * name,float value, const char * unit=nullptr);
+template void addOneLine(String  &mes,const char * name,uint16_t value, const char * unit=nullptr);
 
 void handleRoot() {
   String message = "BMSCom diag status:\n";
@@ -118,15 +119,18 @@ void handleRoot() {
   addOneLine(message, "u_max=", TBMSComobj.m_data.u_max);
   addOneLine(message, "i_max=",TBMSComobj.m_data.i_max);
   addOneLine(message, "i_bat=",TBMSComobj.m_data.i_bat);
+  addOneLine(message, "ch_dsch_state=",TBMSComobj.m_data.ch_dsch_state);
   addOneLine(message, "u_bat=",TBMSComobj.m_data.u_bat);
   addOneLine(message, "t_max=",TBMSComobj.m_data.t_max);
   addOneLine(message, "cell_nr=",TBMSComobj.m_data.cell_nr);
   addOneLine(message, "ah=",TBMSComobj.m_data.ah);
 
-  addOneLine(message, "t1=",TBMSComobj.m_data.t1);
-  addOneLine(message, "t2=",TBMSComobj.m_data.t2);
-  addOneLine(message, "t3=",TBMSComobj.m_data.t3);
-  addOneLine(message, "t4=",TBMSComobj.m_data.t4);
+  for(int ind=0; ind < TBMSCom::Data::MODUL_NR; ind++ ){
+    addOneLine(message, "t",ind+1,TBMSComobj.m_data.t[ind],"°C");
+  }
+
+  addOneLine(message, "soc=",TBMSComobj.m_data.soc);
+  addOneLine(message, "state=",TBMSComobj.m_data.state.all);
 
   for(int ind=0; ind < TBMSCom::Data::U_CELL_NR; ind++ ){
 

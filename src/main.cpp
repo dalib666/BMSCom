@@ -99,9 +99,9 @@ int RX_buffer_IND=0;
 bool startMes = true;
 
 void loop() {
-  static uint32_t lastTime=0xffffffff;
+  //static uint32_t lastTime=0xffffffff;
   static bool BuiltInLed=false;
-  uint32_t actTime=0;
+  //uint32_t actTime=0;
 
   BuiltInLed=!BuiltInLed;    
   digitalWrite(BUILTIN_LED_PIN, BuiltInLed);  

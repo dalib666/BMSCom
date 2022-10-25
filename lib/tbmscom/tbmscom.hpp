@@ -27,6 +27,13 @@ class TBMSCom{
     bool m_startFrame;
     bool m_seekFrameSpace;
 
+    /**
+     Convert from 2 bytes to float, check against the ranges,rescale by scale coef.
+    @return status - true/false - refreshed by new valid value/erro value, no refresh was done
+    */
+    bool  b_to_w_be_check(int framenumber,float & dataItem,uint8_t *buf,int ind,float scale,float rangeL,float rangeH);
+    bool  b_to_w_be_check(int framenumber,uint16_t & dataItem,uint8_t *buf,int ind,uint16_t rangeL,uint16_t rangeH);
+
     public:
     static const   int RXBUFER_LEN=40;
       uint8_t rxBuff[RXBUFER_LEN];
@@ -50,7 +57,11 @@ class TBMSCom{
             StatesBit bit;
             uint16_t all;
         }StateDef;
-        static const int U_CELL_NR=48; // number of cells
+        static const int U_CELL_NR=93; // number of cells
+        static const int MODUL_NR=8; // max number of battery moduls
+
+        int frameErCntr[18];    // er. counters of Rx frames
+
         // frame 1
         static const int FRAMEDATALEN=18;
         float u_min;   // [V] min voltage per cell (0.01) 
@@ -63,21 +74,24 @@ class TBMSCom{
         float i_bat;   // [A] actual current of the battery 
         float unknown; // ??
 
-        // frame 2    
-        float t1;      // [°C] temperature of module 1(0.1)
-        float t2;      // [°C] temperature of module 2(0.1)
-        float t3;      // [°C] temperature of module 3(0.1)
-        float t4;      // [°C] temperature of module 4(0.1)               
-
+        // frame 2,10    
+        float t[MODUL_NR];      // [°C] temperature of module 1(0.1)
+      
         // frame  3...8, 11, 12,13, 14, 15, 16-part
         float u_cell[U_CELL_NR]; //[V] cells voltage (0.001) 
         // frame 8end
-        uint8_t soc;    //[%] State of the charge (1)
+        uint16_t soc;    //[%] State of the charge (1)
         StateDef state; // warning, state ind.
+        // frame 9
+        //float ur1;   //[V] recovery voltage ??? hostitelské úložiště obnovovací napětí nabíjení
+        //float ur2;  //[V] ??? Napětí obnovy vybití dvoubajtového hostitelského úložiště
+
  
         // frame 9
         // frame 10
-        // frame 17       
+        // frame 17     
+        // frame 16
+        uint16_t    ch_dsch_state;      
 
     }m_data;
     

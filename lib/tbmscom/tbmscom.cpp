@@ -61,7 +61,7 @@ void TBMSCom::main(){
         m_startFrame = false;
         DebugCntr=2;
         int frameNumber=m_serialPtr->read();
-        if(frameNumber > 0){           
+        if(frameNumber >0){           //> 0
             int readout = m_serialPtr->readBytes(rxBuff,Data::FRAMEDATALEN);
             if(readout == Data::FRAMEDATALEN){    
                 switch(frameNumber){
@@ -75,9 +75,9 @@ void TBMSCom::main(){
                     case 13:
                     case 14:
                     case 15:
-                        maxInd=(frameNumber-11)*9 + 49;
+                        maxInd=(frameNumber-11)*9 + 57;
                         indBuf=0;
-                        for(int ind= maxInd - 9; ind < maxInd+9; ind++){
+                        for(int ind= maxInd - 9; ind < maxInd; ind++){
                             if(!b_to_w_be_check(frameNumber,m_data.u_cell[ind],rxBuff,indBuf,0.001f,3.0f,4.3f)){
                                 break;
                             }

@@ -96,9 +96,12 @@ void TBMSCom::main(){
                      break;
 
                     case 8:
-                        m_data.u_cell[45]=b_to_w_be(rxBuff,0) * 0.001f;      
-                        m_data.u_cell[46]=b_to_w_be(rxBuff,2) * 0.001f;                      
-                        m_data.u_cell[47]=b_to_w_be(rxBuff,4) * 0.001f;   
+                        if(!b_to_w_be_check(frameNumber,m_data.u_cell[45],rxBuff,0,0.001f,3.0f,4.3f))
+                            break;
+                        if(!b_to_w_be_check(frameNumber,m_data.u_cell[46],rxBuff,2,0.001f,3.0f,4.3f))
+                            break;    
+                        if(!b_to_w_be_check(frameNumber,m_data.u_cell[47],rxBuff,4,0.001f,3.0f,4.3f))
+                            break;    
                         //m_data.soc=b_to_w_be(rxBuff,8);
                         if(!b_to_w_be_check(frameNumber,m_data.soc,rxBuff,8,0,100))
                             break;
@@ -112,13 +115,26 @@ void TBMSCom::main(){
                         //m_data.u_min=b_to_w_be(rxBuff,0) * 0.01;   // [V] min voltage per cell (0.01) 
                         if(!b_to_w_be_check(frameNumber,m_data.u_min,rxBuff,0,0.01f,3.0f,4.2f))
                             break;
-                        m_data.i_max=b_to_w_be(rxBuff,2) * 0.1;   // [A] max charge/discharge current (0.1)
+                        //m_data.i_max=b_to_w_be(rxBuff,2) * 0.1;   // [A] max charge/discharge current (0.1)
+                        if(!b_to_w_be_check(frameNumber,m_data.i_max,rxBuff,2,0.1f,10,30))
+                            break;
                         m_data.ah=b_to_w_be(rxBuff,4);   // AH number ??? 
-                        m_data.cell_nr=b_to_w_be(rxBuff,6); // number of cells
-                        m_data.u_max=b_to_w_be(rxBuff,8) * 0.01;   // [V] max charge voltage per cell (0.01)
-                        m_data.t_max=b_to_w_be(rxBuff,10) * 0.1;   // [°C] max temperature of battery (0.1)
-                        m_data.u_bat=b_to_w_be(rxBuff,12) * 0.01;   // [V] actual voltage of the battery(0.01)
-                        m_data.i_bat=b_to_w_be(rxBuff,14) * 0.01;   // [A] actual current of the battery 
+                                        
+                        //m_data.cell_nr=b_to_w_be(rxBuff,6); // number of cells
+                        if(!b_to_w_be_check(frameNumber,m_data.cell_nr,rxBuff,6,12,96))
+                            break;                    
+                        //m_data.u_max=b_to_w_be(rxBuff,8) * 0.01;   // [V] max charge voltage per cell (0.01)
+                        if(!b_to_w_be_check(frameNumber,m_data.u_max,rxBuff,8,0.01f,50,403))
+                            break;   
+                        //m_data.t_max=b_to_w_be(rxBuff,10) * 0.1;   // [°C] max temperature of battery (0.1)
+                        if(!b_to_w_be_check(frameNumber,m_data.t_max,rxBuff,10,0.1f,30,50))
+                            break; 
+                        //m_data.u_bat=b_to_w_be(rxBuff,12) * 0.01;   // [V] actual voltage of the battery(0.01)
+                        if(!b_to_w_be_check(frameNumber,m_data.u_bat,rxBuff,12,0.01f,36,403))
+                            break; 
+                       // m_data.i_bat=b_to_w_be(rxBuff,14) * 0.01;   // [A] actual current of the battery 
+                        if(!b_to_w_be_check(frameNumber,m_data.i_bat,rxBuff,14,0.01f,0,30))
+                            break;                         
                         m_data.unknown=b_to_w_be(rxBuff,16); // ??
                         
                     break;
@@ -126,7 +142,9 @@ void TBMSCom::main(){
                     case 2:
                         indBuf=2;
                         for(int ind=0;ind<4;ind++){
-                            m_data.t[ind]=b_to_w_be(rxBuff,indBuf) * 0.1;                                   
+                            //m_data.t[ind]=b_to_w_be(rxBuff,indBuf) * 0.1;    
+                            if(!b_to_w_be_check(frameNumber,m_data.t[ind],rxBuff,indBuf,0.1f,1.0f,40.0f))
+                                break;                               
                             indBuf+=4;
                         }    
                     break;
@@ -139,7 +157,9 @@ void TBMSCom::main(){
                         maxInd=(frameNumber-2)*9;
                         indBuf=0;
                         for(int ind= maxInd - 9; ind < maxInd; ind++){
-                            m_data.u_cell[ind]=b_to_w_be(rxBuff,indBuf) * 0.001f;
+                           // m_data.u_cell[ind]=b_to_w_be(rxBuff,indBuf) * 0.001f;
+                            if(!b_to_w_be_check(frameNumber,m_data.u_cell[ind],rxBuff,indBuf,0.001f,3.0f,4.3f))
+                                break;                            
                             indBuf+=2;
                         }      
                      break;

@@ -59,8 +59,8 @@ class TBMSCom{
         }StateDef;
         static const int U_CELL_NR=93; // number of cells
         static const int MODUL_NR=8; // max number of battery moduls
-
-        int frameErCntr[18];    // er. counters of Rx frames
+        static const int FRAMES_NR=18;
+        int frameErCntr[FRAMES_NR];    // er. counters of Rx frames
 
         // frame 1
         static const int FRAMEDATALEN=18;

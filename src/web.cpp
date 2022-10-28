@@ -115,6 +115,12 @@ void handleRoot() {
   message +=SW_VERSION; message +="\n";
   message +="Comp - date/time= "; message +=COMP_DATE; message +="/"; message +=COMP_TIME; message +="\n";
 
+  message+= "frameErCntr = ";
+  for(int i=0;i<TBMSCom::Data::FRAMES_NR;i++){
+    message+= TBMSComobj.m_data.frameErCntr[i] + (String)" | ";
+  }
+  message +="\n";
+
   addOneLine(message, "u_min=",TBMSComobj.m_data.u_min);
   addOneLine(message, "u_max=", TBMSComobj.m_data.u_max);
   addOneLine(message, "i_max=",TBMSComobj.m_data.i_max);

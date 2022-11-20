@@ -19,7 +19,7 @@ extern int DebugCntr;
 bool  TBMSCom::b_to_w_be_check(int framenumber,float & dataItem,uint8_t *buf,int ind,float scale,float rangeL,float rangeH){
     bool status = false;
     float value= scale * (float) (buf[ind]<<8 | buf[ind+1]);
-    if((value > rangeL)&&(value < rangeH)){
+    if((value >= rangeL)&&(value <= rangeH)){
         status=true;
         dataItem=value;
     }
@@ -30,7 +30,7 @@ bool  TBMSCom::b_to_w_be_check(int framenumber,float & dataItem,uint8_t *buf,int
 bool  TBMSCom::b_to_w_be_check(int framenumber,uint16_t & dataItem,uint8_t *buf,int ind,uint16_t rangeL,uint16_t rangeH){
     bool status = false;
     uint16_t value= (buf[ind]<<8 | buf[ind+1]);
-    if((value > rangeL)&&(value < rangeH)){
+    if((value >= rangeL)&&(value <= rangeH)){
         status=true;
         dataItem=value;
     }
@@ -45,7 +45,11 @@ void  TBMSCom::init(HardwareSerial * uart, int baudRate){
     m_baudRate=baudRate;
     m_seekFrameSpace=true;
     m_startFrame=false;
-    m_serialPtr->setTimeout(5+((uint32_t) Data::FRAMEDATALEN * m_baudRate)/10000); 
+    m_startTime=0;
+    m_frameTimoute=2 + ((uint32_t) Data::FRAMEDATALEN * m_baudRate)/10000;
+    m_serialPtr->setTimeout(m_frameTimoute); 
+    initAllData();
+
 }
 
 
@@ -61,13 +65,17 @@ void TBMSCom::main(){
         m_startFrame = false;
         DebugCntr=2;
         int frameNumber=m_serialPtr->read();
-        if(frameNumber >0){           //> 0
+        if(frameNumber >0 && frameNumber <= Data::FRAMES_MAXNR){           //> 0
             int readout = m_serialPtr->readBytes(rxBuff,Data::FRAMEDATALEN);
-            if(readout == Data::FRAMEDATALEN){    
+            m_seekFrameSpace=true;
+            DebugCntr=3;
+            if(readout == Data::FRAMEDATALEN && (millis() - m_startTime) < 20){    
                 switch(frameNumber){
 
                     case 16:
                         m_data.ch_dsch_state=b_to_w_be(rxBuff,14);
+                        m_data.frameRxCntr[frameNumber]++;
+                        m_data.frameRxTime[frameNumber]=millis();
                     break;    
 
                     case 11:
@@ -78,21 +86,27 @@ void TBMSCom::main(){
                         maxInd=(frameNumber-11)*9 + 57;
                         indBuf=0;
                         for(int ind= maxInd - 9; ind < maxInd; ind++){
+                            if(m_data.cell_nr <= ind)
+                                break;  // no more valid cells
                             if(!b_to_w_be_check(frameNumber,m_data.u_cell[ind],rxBuff,indBuf,0.001f,3.0f,4.3f)){
                                 break;
                             }
                             indBuf+=2;
-                        }      
+                        }  
+                        m_data.frameRxCntr[frameNumber]++;    
+                        m_data.frameRxTime[frameNumber]=millis(); 
                      break;
 
                     case 10:
                         indBuf=2;
                         for(int ind=4;ind<8;ind++){
                             //m_data.t[ind]=b_to_w_be(rxBuff,indBuf) * 0.1;
-                            if(!b_to_w_be_check(frameNumber,m_data.t[ind],rxBuff,indBuf,0.1f,1.0f,40.0f))
+                            if(!b_to_w_be_check(frameNumber,m_data.t[ind],rxBuff,indBuf,0.1f,0.0f,40.0f))
                                 break;
                             indBuf+=4;
                         }    
+                        m_data.frameRxCntr[frameNumber]++;
+                        m_data.frameRxTime[frameNumber]=millis();
                      break;
 
                     case 8:
@@ -108,7 +122,8 @@ void TBMSCom::main(){
                         //m_data.state.all=b_to_w_be(rxBuff,14);
                         if(!b_to_w_be_check(frameNumber,m_data.state.all,rxBuff,14,0,512))
                             break;
-                          
+                        m_data.frameRxCntr[frameNumber]++;
+                        m_data.frameRxTime[frameNumber]=millis();  
                     break;
 
                     case 1:
@@ -123,8 +138,9 @@ void TBMSCom::main(){
                         //m_data.cell_nr=b_to_w_be(rxBuff,6); // number of cells
                         if(!b_to_w_be_check(frameNumber,m_data.cell_nr,rxBuff,6,12,96))
                             break;                    
+                        
                         //m_data.u_max=b_to_w_be(rxBuff,8) * 0.01;   // [V] max charge voltage per cell (0.01)
-                        if(!b_to_w_be_check(frameNumber,m_data.u_max,rxBuff,8,0.01f,50,403))
+                        if(!b_to_w_be_check(frameNumber,m_data.u_max,rxBuff,8,0.01f,4.00f,4.15f))
                             break;   
                         //m_data.t_max=b_to_w_be(rxBuff,10) * 0.1;   // [°C] max temperature of battery (0.1)
                         if(!b_to_w_be_check(frameNumber,m_data.t_max,rxBuff,10,0.1f,30,50))
@@ -136,7 +152,8 @@ void TBMSCom::main(){
                         if(!b_to_w_be_check(frameNumber,m_data.i_bat,rxBuff,14,0.01f,0,30))
                             break;                         
                         m_data.unknown=b_to_w_be(rxBuff,16); // ??
-                        
+                        m_data.frameRxCntr[frameNumber]++;
+                        m_data.frameRxTime[frameNumber]=millis();
                     break;
 
                     case 2:
@@ -147,6 +164,8 @@ void TBMSCom::main(){
                                 break;                               
                             indBuf+=4;
                         }    
+                        m_data.frameRxCntr[frameNumber]++;
+                        m_data.frameRxTime[frameNumber]=millis();
                     break;
 
                     case 3:
@@ -156,12 +175,18 @@ void TBMSCom::main(){
                     case 7:
                         maxInd=(frameNumber-2)*9;
                         indBuf=0;
-                        for(int ind= maxInd - 9; ind < maxInd; ind++){
-                           // m_data.u_cell[ind]=b_to_w_be(rxBuff,indBuf) * 0.001f;
-                            if(!b_to_w_be_check(frameNumber,m_data.u_cell[ind],rxBuff,indBuf,0.001f,3.0f,4.3f))
-                                break;                            
-                            indBuf+=2;
-                        }      
+                        if(m_data.cell_nr > 0){
+                            for(int ind= maxInd - 9; ind < maxInd; ind++){
+                            // m_data.u_cell[ind]=b_to_w_be(rxBuff,indBuf) * 0.001f;
+                                if(m_data.cell_nr <= ind)
+                                    break;  // no more valid cells
+                                if(!b_to_w_be_check(frameNumber,m_data.u_cell[ind],rxBuff,indBuf,0.001f,3.0f,4.3f))
+                                    break;                            
+                                indBuf+=2;
+                            }      
+                        }    
+                        m_data.frameRxCntr[frameNumber]++;
+                        m_data.frameRxTime[frameNumber]=millis();
                      break;
 
                      
@@ -169,6 +194,18 @@ void TBMSCom::main(){
             }    
         }
     }
+    else{
+        if((millis() - m_lastCheckRunTime) > CHECK_RX_TIMEOUT_PERIOD && millis() > RX_TIMEOUT){
+            m_lastCheckRunTime=millis();
+            unsigned long limitTime=millis() - RX_TIMEOUT;
+            for(int frameInd=1;frameInd< Data::FRAMES_NR;frameInd++){
+                if(millis() > m_data.frameRxTime[frameInd] && m_data.frameRxTime[frameInd] < limitTime){
+                   initData(frameInd);
+                }
+            }
+        }
+    }
+    m_seekFrameSpace=true;
 }
 
 void TBMSCom::period(){
@@ -184,10 +221,34 @@ void TBMSCom::period(){
             m_time1=millis();
         uint32_t del_Time=millis() - m_time1;
         if(del_Time >= MIN_FRAME_SPACE){
+            m_seekFrameSpace = false;
             DebugCntr=del_Time;
             m_startFrame=true;
+            m_startTime=millis();
         }
     }
     else
         m_time1=0;
 }
+
+void TBMSCom::initAllData(){
+    for(int ind=0;ind<Data::FRAMES_NR;ind++)
+        initData(ind);
+}
+
+void TBMSCom::initData(int frameNr){
+    switch(frameNr){
+        case 1:
+            m_data.u_min=NODATA_FL;
+            m_data.i_max=NODATA_FL;
+            m_data.ah=NODATA_UINT16;
+            m_data.cell_nr=NODATA_UINT16;
+            m_data.u_max=NODATA_FL;
+            m_data.t_max=NODATA_FL;
+            m_data.u_bat=NODATA_FL;
+            m_data.i_bat=NODATA_FL;
+        break;
+    }
+
+}
+ 

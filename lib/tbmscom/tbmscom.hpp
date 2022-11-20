@@ -10,13 +10,12 @@
 #define   tbmscom_hpp
 
 #include <Arduino.h>
-//#include "dtypes.h"
+#include <dtypes.h>
 
 class TBMSCom{
     static const   int MIN_FRAME_SPACE=8u;
-
-    
-    //byte m_rxBuf[RXBUFER_LEN];
+    static const int CHECK_RX_TIMEOUT_PERIOD=1000u;    //[ms]  period of checking RX timeout
+    static const int RX_TIMEOUT = 5000;                //[ms]  RX timeout
     //byte m_rxBufSH[RXBUFER_LEN];
     HardwareSerial * m_serialPtr;
     int m_newRxDatalen;
@@ -26,13 +25,24 @@ class TBMSCom{
     int m_prev_avail;
     bool m_startFrame;
     bool m_seekFrameSpace;
-
+    int m_frameTimoute;
+    unsigned long m_startTime;
+    unsigned long m_lastCheckRunTime;
     /**
      Convert from 2 bytes to float, check against the ranges,rescale by scale coef.
     @return status - true/false - refreshed by new valid value/erro value, no refresh was done
     */
     bool  b_to_w_be_check(int framenumber,float & dataItem,uint8_t *buf,int ind,float scale,float rangeL,float rangeH);
     bool  b_to_w_be_check(int framenumber,uint16_t & dataItem,uint8_t *buf,int ind,uint16_t rangeL,uint16_t rangeH);
+    /**
+     * init frame data
+     * @frameNr - frame number
+    */
+    void initData(int frameNr);
+
+    /**
+     * init all data  */
+    void initAllData();
 
     public:
     static const   int RXBUFER_LEN=40;
@@ -60,8 +70,10 @@ class TBMSCom{
         static const int U_CELL_NR=93; // number of cells
         static const int MODUL_NR=8; // max number of battery moduls
         static const int FRAMES_NR=18;
+        static const int FRAMES_MAXNR=FRAMES_NR-1;
         int frameErCntr[FRAMES_NR];    // er. counters of Rx frames
-
+        int frameRxCntr[FRAMES_NR];    // counters of valid  Rx frames
+        unsigned long frameRxTime[FRAMES_NR]; // time of last valid Rx frame
         // frame 1
         static const int FRAMEDATALEN=18;
         float u_min;   // [V] min voltage per cell (0.01) 

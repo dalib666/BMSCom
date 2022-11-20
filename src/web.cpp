@@ -29,6 +29,7 @@ void handleNotFound();
 void handleRoot();
 void handle_preupdate();
 void handle_log();
+void handleDiagData();
 
 /*
 void handleCmd();
@@ -51,7 +52,8 @@ void web_init() {
     WebServer.onNotFound(handleNotFound);
     WebServer.on("/preupdate",  handle_preupdate);  
     WebServer.on("/log",  handle_log);
-
+    WebServer.on("/diag",  handleDiagData);  
+ 
     /*
     WebServer.on("/help", handle_help);
     WebServer.on("/cmd", handleCmd);
@@ -115,10 +117,8 @@ void handleRoot() {
   message +=SW_VERSION; message +="\n";
   message +="Comp - date/time= "; message +=COMP_DATE; message +="/"; message +=COMP_TIME; message +="\n";
 
-  message+= "frameErCntr = ";
-  for(int i=0;i<TBMSCom::Data::FRAMES_NR;i++){
-    message+= TBMSComobj.m_data.frameErCntr[i] + (String)" | ";
-  }
+  
+
   message +="\n";
 
   addOneLine(message, "u_min=",TBMSComobj.m_data.u_min);
@@ -132,7 +132,7 @@ void handleRoot() {
   addOneLine(message, "ah=",TBMSComobj.m_data.ah);
 
   for(int ind=0; ind < TBMSCom::Data::MODUL_NR; ind++ ){
-    addOneLine(message, "t",ind+1,TBMSComobj.m_data.t[ind],"°C");
+    addOneLine(message, "t",ind+1,TBMSComobj.m_data.t[ind]," °C");
   }
 
   addOneLine(message, "soc=",TBMSComobj.m_data.soc);
@@ -143,22 +143,7 @@ void handleRoot() {
     addOneLine(message, "u_cell",ind+1,TBMSComobj.m_data.u_cell[ind] * 1000,"mV");
   }
   message +="\n";
-  message += "Debug Info: \n";
-  message +="========================================================\n";
- 
- message +="RxBuffer = "; 
-  int framLen=TBMSCom::RXBUFER_LEN;
-  byte * bufPtr=TBMSComobj.rxBuff;
-  for(int i=0;i< framLen;i++){
-    message +=  String(bufPtr[i],HEX);
-    message +=" , ";
-  }
-  message +="\n";  
-  message +="DebugCntr = "; message +=DebugCntr; message +="\n";
-  message +="LoopCntr = "; message +=LoopCntr; message +="\n";   
-  message +="LowLoopCntr = "; message +=LowLoopCntr; message +="\n"; 
-  message +="HighLoopCntr = "; message +=HighLoopCntr; message +="\n";
-  message +="ExLowLoopCntr = "; message +=ExLowLoopCntr; message +="\n"; 
+  
  // message +="PingErrCntr = "; message +=PingErrCntr; message +="\n"; 
 
  
@@ -187,6 +172,44 @@ void handle_preupdate(){
   String message = "Ready for update \n"; 
   WebServer.send(200, "text/plain", message);    
   
+}
+
+
+
+void handleDiagData() {
+ 
+  String message = "Debug Info: \n";
+  message +="========================================================\n";
+ 
+
+  message+= "frameErCntr = ";
+  for(int i=0;i<TBMSCom::Data::FRAMES_NR;i++){
+    message+= (String)TBMSComobj.m_data.frameErCntr[i] + (String)" | ";
+  }
+  message +="\n";
+  message +="========================================================\n";
+  message+= "frameRxCntr = ";
+  for(int i=0;i<TBMSCom::Data::FRAMES_NR;i++){
+    message+= (String)TBMSComobj.m_data.frameRxCntr[i] + (String)" | ";
+  }
+  message +="\n";
+  message +="========================================================\n";
+ message +="RxBuffer = "; 
+  int framLen=TBMSCom::RXBUFER_LEN;
+  byte * bufPtr=TBMSComobj.rxBuff;
+  for(int i=0;i< framLen;i++){
+    message +=  String(bufPtr[i],HEX);
+    message +=" , ";
+  }
+  message +="\n";  
+  message +="DebugCntr = "; message +=DebugCntr; message +="\n";
+  message +="LoopCntr = "; message +=LoopCntr; message +="\n";   
+  message +="LowLoopCntr = "; message +=LowLoopCntr; message +="\n"; 
+  message +="HighLoopCntr = "; message +=HighLoopCntr; message +="\n";
+  message +="ExLowLoopCntr = "; message +=ExLowLoopCntr; message +="\n"; 
+  
+  
+  WebServer.send(200, "text/plain", message);
 }
 
 /*

@@ -30,7 +30,16 @@
 #define HWTIMER_PERIOD 2  //[ms] period of HW timer ISR
 
 
-#define BUILTIN_LED_PIN     2   // internal LED
+#define BUILTIN_LED_PIN     2   // internal LED, RED led
+#define GREEN_LED_PIN     2   // internal LED, GREEN led
+#define RELE_HEATING_PIN      14   
+#define RELE_VENTILATION_PIN  12
+#define RELE_MAIN_PIN         13  // main switcher - serial contact
+#define RELE_RESERVE_PIN      10  // reserve switcher - serial contact
+
+#define LED_ACTIVELEV false
+#define RELE_ACTIVELEV false
+
 /*#define STATUS_LED_PIN      12    // operational status LED
 #define WIFISTATUS_LED_PIN  16    // wifi status LED
 #define WIFICONF_BUT_PIN  4       // button for WIFI conf.

@@ -8,6 +8,7 @@
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 #include <ESP8266HTTPClient.h>
 #include <ESP8266TimerInterrupt.h>
+#include <ardukit.h>
 #include "web.h"
 #include "Global.h"
 
@@ -19,15 +20,27 @@ void IRAM_ATTR hwTimerHandler()
 {
   TBMSComobj.period();
 }
-
-
+void temp_control(void *);
 
 
 void setup() {
   pinMode(BUILTIN_LED_PIN, OUTPUT);
-  TBMSComobj.init(&Serial,CPUINTERFACE_SPEED);
+  pinMode(GREEN_LED_PIN, OUTPUT);
+  pinMode(RELE_HEATING_PIN, OUTPUT);
+  pinMode(RELE_VENTILATION_PIN, OUTPUT);
+  pinMode(RELE_MAIN_PIN, OUTPUT);
+  pinMode(RELE_RESERVE_PIN, OUTPUT);
+
+  digitalWrite(BUILTIN_LED_PIN, LED_ACTIVELEV);  //On - indicate is starting
+  digitalWrite(GREEN_LED_PIN, !LED_ACTIVELEV);  
+  digitalWrite(RELE_HEATING_PIN, !RELE_ACTIVELEV);  
+  digitalWrite(RELE_VENTILATION_PIN, !RELE_ACTIVELEV); 
+  digitalWrite(RELE_MAIN_PIN, !RELE_ACTIVELEV);  
+  digitalWrite(RELE_RESERVE_PIN, !RELE_ACTIVELEV); 
 
   Serial.begin(CPUINTERFACE_SPEED);
+  TBMSComobj.init(&Serial,CPUINTERFACE_SPEED);
+
   DEBUG_PART(Serial.println("Starting..."));
   delay(10);
   /*
@@ -80,11 +93,13 @@ void setup() {
   }
  
    
+  adk::set_interval(temp_control, 1000);           // function call
+
   while(Serial.available()) {Serial.read();} // clear any chaos before 
   
   //ESP.wdtDisable();   //not activated WDT to test stability, disable SW WDT to enable HW WDT -->time out is in about 4 sec 
 
-
+  delay(5000); //wait for 5 sec to start running
   // Init HW timer
   bool startStatus = ITimer.attachInterruptInterval(HWTIMER_PERIOD * 1000, hwTimerHandler);
   assert(startStatus);
@@ -99,12 +114,10 @@ int RX_buffer_IND=0;
 bool startMes = true;
 
 void loop() {
-  //static uint32_t lastTime=0xffffffff;
-  static bool BuiltInLed=false;
-  //uint32_t actTime=0;
 
-  BuiltInLed=!BuiltInLed;    
-  digitalWrite(BUILTIN_LED_PIN, BuiltInLed);  
+  adk::run(); // run ardukit engine
+  //static uint32_t lastTime=0xffffffff;
+   
 
   //debug part
 /*
@@ -135,3 +148,47 @@ void loop() {
 
 }
 
+void temp_control(void *){
+  static int ReleToSwitch=0;
+  static bool BuiltInLed=false;
+  //uint32_t actTime=0;
+
+ 
+
+  
+}
+
+
+/* Test Relay
+ BuiltInLed=!BuiltInLed;    
+  digitalWrite(BUILTIN_LED_PIN, BuiltInLed);  
+
+  switch(ReleToSwitch){
+    case 0:
+      ReleToSwitch++;
+      digitalWrite(RELE_HEATING_PIN, RELE_ACTIVELEV);  
+    break;  
+  
+    case 1:
+      ReleToSwitch++;
+      digitalWrite(RELE_VENTILATION_PIN, RELE_ACTIVELEV);
+    break;  
+
+    case 2:
+      ReleToSwitch++;
+      digitalWrite(RELE_MAIN_PIN, RELE_ACTIVELEV);  
+    break; 
+
+    case 3:
+      ReleToSwitch++;
+      digitalWrite(RELE_RESERVE_PIN, RELE_ACTIVELEV); 
+    break; 
+
+    case 4:
+      ReleToSwitch=0;
+      digitalWrite(RELE_HEATING_PIN, !RELE_ACTIVELEV);  
+      digitalWrite(RELE_VENTILATION_PIN, !RELE_ACTIVELEV); 
+      digitalWrite(RELE_MAIN_PIN, !RELE_ACTIVELEV);  
+      digitalWrite(RELE_RESERVE_PIN, !RELE_ACTIVELEV); 
+  }
+  */

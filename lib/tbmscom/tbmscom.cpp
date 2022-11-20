@@ -236,8 +236,9 @@ void TBMSCom::initAllData(){
         initData(ind);
 }
 
-void TBMSCom::initData(int frameNr){
-    switch(frameNr){
+void TBMSCom::initData(int frameNumber){
+    int maxInd;
+    switch(frameNumber){
         case 1:
             m_data.u_min=NODATA_FL;
             m_data.i_max=NODATA_FL;
@@ -248,6 +249,53 @@ void TBMSCom::initData(int frameNr){
             m_data.u_bat=NODATA_FL;
             m_data.i_bat=NODATA_FL;
         break;
+
+        case 16:
+            m_data.ch_dsch_state=NODATA_UINT16;
+            break;
+
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+            maxInd=(frameNumber-11)*9 + 57;
+            for(int ind= maxInd - 9; ind < maxInd; ind++){
+               m_data.u_cell[ind]=  NODATA_FL; 
+            }
+            break;
+
+        case 10:
+            for(int ind=4;ind<8;ind++){
+                m_data.t[ind]=NODATA_FL;
+            }    
+            break;   
+
+        case 8:
+            m_data.u_cell[45]=NODATA_FL;
+            m_data.u_cell[46]=NODATA_FL;
+            m_data.u_cell[47]=NODATA_FL;
+            m_data.soc=NODATA_UINT16;
+            m_data.state.all=NODATA_UINT16;
+            break;    
+
+        case 2:
+            for(int ind=0;ind<4;ind++){
+                m_data.t[ind]=NODATA_FL;
+            }    
+            break;
+
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            maxInd=(frameNumber-2)*9;
+            for(int ind= maxInd - 9; ind < maxInd; ind++){
+                m_data.u_cell[ind]=NODATA_FL;
+            }      
+            break;
+
     }
 
 }

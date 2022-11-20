@@ -38,7 +38,7 @@ class TBMSCom{
      * init frame data
      * @frameNr - frame number
     */
-    void initData(int frameNr);
+    void initData(int frameNumber);
 
     /**
      * init all data  */

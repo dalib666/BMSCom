@@ -121,21 +121,21 @@ void handleRoot() {
 
   message +="\n";
 
-  addOneLine(message, "u_min=",TBMSComobj.m_data.u_min);
-  addOneLine(message, "u_max=", TBMSComobj.m_data.u_max);
-  addOneLine(message, "i_max=",TBMSComobj.m_data.i_max);
-  addOneLine(message, "i_bat=",TBMSComobj.m_data.i_bat);
-  addOneLine(message, "ch_dsch_state=",TBMSComobj.m_data.ch_dsch_state);
-  addOneLine(message, "u_bat=",TBMSComobj.m_data.u_bat);
-  addOneLine(message, "t_max=",TBMSComobj.m_data.t_max);
-  addOneLine(message, "cell_nr=",TBMSComobj.m_data.cell_nr);
-  addOneLine(message, "ah=",TBMSComobj.m_data.ah);
+  addOneLine(message, "u_min",TBMSComobj.m_data.u_min, "V");
+  addOneLine(message, "u_max", TBMSComobj.m_data.u_max, "V");
+  addOneLine(message, "i_max",TBMSComobj.m_data.i_max, "A");
+  addOneLine(message, "i_bat",TBMSComobj.m_data.i_bat, "A");
+  addOneLine(message, "ch_dsch_state",TBMSComobj.m_data.ch_dsch_state);
+  addOneLine(message, "u_bat",TBMSComobj.m_data.u_bat, "V");
+  addOneLine(message, "t_max",TBMSComobj.m_data.t_max, "C");
+  addOneLine(message, "cell_nr",TBMSComobj.m_data.cell_nr);
+  addOneLine(message, "ah",TBMSComobj.m_data.ah);
 
   for(int ind=0; ind < TBMSCom::Data::MODUL_NR; ind++ ){
-    addOneLine(message, "t",ind+1,TBMSComobj.m_data.t[ind]," °C");
+    addOneLine(message, "t",ind+1,TBMSComobj.m_data.t[ind],"C");
   }
 
-  addOneLine(message, "soc=",TBMSComobj.m_data.soc);
+  addOneLine(message, "soc=",TBMSComobj.m_data.soc,"%");
   addOneLine(message, "state=",TBMSComobj.m_data.state.all);
 
   for(int ind=0; ind < TBMSCom::Data::U_CELL_NR; ind++ ){

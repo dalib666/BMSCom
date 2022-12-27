@@ -202,12 +202,14 @@ void handleDiagData() {
     message +=" , ";
   }
   message +="\n";  
+  message +="Loop_runs_perSec = "; message +=Loop_runs_perSec; message +="\n";
   message +="DebugCntr = "; message +=DebugCntr; message +="\n";
   message +="LoopCntr = "; message +=LoopCntr; message +="\n";   
-  message +="LowLoopCntr = "; message +=LowLoopCntr; message +="\n"; 
+  message +="RunTime = "; message +=(float)millis()/1000.0f; message +="\n";     
+ /* message +="LowLoopCntr = "; message +=LowLoopCntr; message +="\n"; 
   message +="HighLoopCntr = "; message +=HighLoopCntr; message +="\n";
   message +="ExLowLoopCntr = "; message +=ExLowLoopCntr; message +="\n"; 
-  
+  */
   
   WebServer.send(200, "text/plain", message);
 }

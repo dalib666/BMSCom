@@ -9,10 +9,12 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266TimerInterrupt.h>
 #include <ardukit.h>
+#include "hamqtt.hpp"
 #include "web.h"
 #include "Global.h"
+#include "Mqtt.hpp"
 
-TBMSCom TBMSComobj;  //test
+TBMSCom TBMSComobj;  
 
 ESP8266Timer ITimer;
 
@@ -22,6 +24,7 @@ void IRAM_ATTR hwTimerHandler()
 }
 void temp_control(void *);
 
+int Loop_runs_perSec;
 
 void setup() {
   pinMode(BUILTIN_LED_PIN, OUTPUT);
@@ -80,8 +83,6 @@ void setup() {
     DEBUG_PART(Serial.print("IP address: "));
     DEBUG_PART(Serial.println(WiFi.localIP()));
 
-    //Mqtt_init();
-
     web_init();
     DEBUG_PART(Serial.println("HTTP server started"));
 
@@ -91,18 +92,20 @@ void setup() {
     } 
     DEBUG_PART(Serial.println(""));
   }
- 
+  Mqtt_init(); 
    
   adk::set_interval(temp_control, 1000);           // function call
+  adk::set_interval(Mqtt_loopQ, 1000);           // function call
+  adk::set_interval(Mqtt_loopS, 20000);           // function call
 
   while(Serial.available()) {Serial.read();} // clear any chaos before 
   
-  //ESP.wdtDisable();   //not activated WDT to test stability, disable SW WDT to enable HW WDT -->time out is in about 4 sec 
-
-  delay(5000); //wait for 5 sec to start running
+ 
+  //delay(5000); //wait for 5 sec to start running
   // Init HW timer
   bool startStatus = ITimer.attachInterruptInterval(HWTIMER_PERIOD * 1000, hwTimerHandler);
   assert(startStatus);
+  ESP.wdtDisable();   //disable SW WDT to enable HW WDT -->time out is in about 4 sec 
 
 
 }
@@ -114,43 +117,26 @@ int RX_buffer_IND=0;
 bool startMes = true;
 
 void loop() {
-
+  static int loop_diag_cntr=0;
+  static unsigned long last_mes_time=0;
+  LoopCntr++;
+  loop_diag_cntr++;
   adk::run(); // run ardukit engine
-  //static uint32_t lastTime=0xffffffff;
-   
-
-  //debug part
-/*
-  int char_ = Serial.read();
-  if(char_ >0){
-    actTime = millis();
-    if(char_== 0x1 && ((actTime - lastTime) > 6))
-      startMes=true;
-    lastTime=actTime;
-  }
-  if(startMes){
-    if(RX_buffer_IND < BUFFER_LEN){
-      if(char_ >0){
-
-          RX_time[RX_buffer_IND]=actTime;
-          RX_buffer[RX_buffer_IND]=char_;
-          RX_buffer_IND++;
-      }
-    }  
-    else  
-      startMes = false;
-  }  
-  */  
-  // put your main code here, to run repeatedly:
   TBMSComobj.main();
-
+  Hamqtt::main();
   WebServer.handleClient();
+  if((millis() - last_mes_time) > 1000){
+    Loop_runs_perSec=loop_diag_cntr;
+    last_mes_time=millis();
+    loop_diag_cntr=0;
+  }
 
 }
 
 void temp_control(void *){
   static int ReleToSwitch=0;
   static bool BuiltInLed=false;
+  ESP.wdtFeed();
   //uint32_t actTime=0;
 
  

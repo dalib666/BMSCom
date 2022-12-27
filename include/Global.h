@@ -13,7 +13,6 @@
 #include <ESP8266TimerInterrupt.h>
 #include "tbmscom.hpp"
 
-#define DEBUG_MODE
 
 #define SW_VERSION  "V1.0.0"
 #define COMP_DATE __DATE__;
@@ -53,6 +52,7 @@ extern long HighLoopCntr;
 extern long ExLowLoopCntr;
 extern int DebugCntr;
 extern int PingErrCntr;
+extern int Loop_runs_perSec;
 
 #define BUFFER_LEN 64
 extern int RX_buffer_IND;

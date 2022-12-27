@@ -54,7 +54,7 @@ void  TBMSCom::init(HardwareSerial * uart, int baudRate){
 
 
 void TBMSCom::getData(Data * ptr){
-
+    *ptr=m_data;
 }
 
 

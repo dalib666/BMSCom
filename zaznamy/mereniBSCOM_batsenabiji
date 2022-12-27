@@ -1,0 +1,39 @@
+nabiji se
+i_bat = 1.75 A
+ch_dsch_state = 3 -
+u_bat = 267.26 V
+t_max = 40.00 C
+cell_nr = 72 -
+ah = 1250 -
+t1 = 17.40 C
+t2 = 17.10 C
+t3 = 16.70 C
+t4 = 16.30 C
+t5 = 16.00 C
+t6 = 15.50 C
+t7 = 0.00 C
+t8 = 0.00 C
+soc= = 89 -
+state= = 0 -
+
+
+vybíjí se
+u_min = 3.35 V
+u_max = 4.15 V
+i_max = 30.00 A
+i_bat = 1.56 A
+ch_dsch_state = 3 -
+u_bat = 288.99 V
+t_max = 40.00 C
+cell_nr = 72 -
+ah = 1250 -
+t1 = 17.50 C
+t2 = 17.20 C
+t3 = 16.80 C
+t4 = 16.40 C
+t5 = 16.00 C
+t6 = 15.30 C
+t7 = 0.00 C
+t8 = 0.00 C
+soc= = 94 -
+state= = 0 -

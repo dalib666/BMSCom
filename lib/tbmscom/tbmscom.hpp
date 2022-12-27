@@ -15,7 +15,7 @@
 class TBMSCom{
     static const   int MIN_FRAME_SPACE=8u;
     static const int CHECK_RX_TIMEOUT_PERIOD=1000u;    //[ms]  period of checking RX timeout
-    static const int RX_TIMEOUT = 5000;                //[ms]  RX timeout
+    static const int RX_TIMEOUT = 10000;                //[ms]  RX timeout
     //byte m_rxBufSH[RXBUFER_LEN];
     HardwareSerial * m_serialPtr;
     int m_newRxDatalen;

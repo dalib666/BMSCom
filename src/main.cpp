@@ -9,20 +9,26 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266TimerInterrupt.h>
 #include <ardukit.h>
+#include <Pinger.h>
 #include "hamqtt.hpp"
 #include "web.h"
 #include "Global.h"
 #include "Mqtt.hpp"
 
 TBMSCom TBMSComobj;  
-
+Pinger Pinger_;
+int PingErrCntr=0;
 ESP8266Timer ITimer;
+
+
+ 
 
 void IRAM_ATTR hwTimerHandler()
 {
   TBMSComobj.period();
 }
 void temp_control(void *);
+void checkNetConnection(void *);
 
 int Loop_runs_perSec;
 
@@ -97,6 +103,8 @@ void setup() {
   adk::set_interval(temp_control, 1000);           // function call
   adk::set_interval(Mqtt_loopQ, 1000);           // function call
   adk::set_interval(Mqtt_loopS, 20000);           // function call
+  adk::set_interval(checkNetConnection, 3000);    //  
+
 
   while(Serial.available()) {Serial.read();} // clear any chaos before 
   
@@ -105,6 +113,29 @@ void setup() {
   // Init HW timer
   bool startStatus = ITimer.attachInterruptInterval(HWTIMER_PERIOD * 1000, hwTimerHandler);
   assert(startStatus);
+  
+  
+  
+  Pinger_.OnReceive([](const PingerResponse& response)
+  {
+    if(!(response.ReceivedResponse)){
+      PingErrCntr++;
+    }
+    else{
+      PingErrCntr = 0;
+    }
+    DEBUG_LOG(true,"PingErrCntr=",PingErrCntr);
+    // Return true to continue the ping sequence.
+    // If current event returns false, the ping sequence is interrupted.
+    return false;
+  });
+
+  Pinger_.OnEnd([](const PingerResponse& response)
+  {
+    return true;
+  });
+   
+  
   ESP.wdtDisable();   //disable SW WDT to enable HW WDT -->time out is in about 4 sec 
 
 
@@ -137,13 +168,20 @@ void temp_control(void *){
   static int ReleToSwitch=0;
   static bool BuiltInLed=false;
   ESP.wdtFeed();
+
+  BuiltInLed=!BuiltInLed;    
+  digitalWrite(BUILTIN_LED_PIN, BuiltInLed);  
   //uint32_t actTime=0;
-
- 
-
   
 }
 
+void checkNetConnection(void *){
+  if(PingErrCntr >=3){
+     // DebugCntr++;
+      ESP.restart(); // not possible communicate with net, may be some error, reset system
+  }
+  Pinger_.Ping(WiFi.gatewayIP());   
+}
 
 /* Test Relay
  BuiltInLed=!BuiltInLed;    

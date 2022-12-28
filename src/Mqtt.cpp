@@ -22,7 +22,7 @@ Hamqtt DevObj("BMS", nullptr,Hamqtt::PERTYPE_LOWSPEED,"BMS01","DK",SW_VERSION,"0
 void entCallBack(int indOfEnt, String &payload){
   /*DEBUG_LOG(true,"entCallBack:indOfEnt= ",indOfEnt);
   DEBUG_LOG_NOF(true,"payload= ",payload.c_str());
-  DevObj.publishValue("Req_Power", payload.toFloat()); //test value*/
+  DevObj.publishValue("Req_Power", payload.toFloat()); */
 }
 
 
@@ -31,26 +31,14 @@ void Mqtt_init(){
     DEBUG_LOG0(true,"Mqtt init");
     //DevObj.registerEntity("sensor","Water_Temp",Hamqtt::PERTYPE_NORMAL,"temperature","°C",nullptr,"{{value_json.wTemp}}","mdi:thermometer");
     DevObj.registerSensorEntity("soc",Hamqtt::PERTYPE_LOWSPEED,"battery","%",nullptr,1,true);
-    DevObj.registerSensorEntity("alert",Hamqtt::PERTYPE_NORMAL,nullptr);
-    DevObj.registerSensorEntity("warning",Hamqtt::PERTYPE_NORMAL,nullptr);  
+    DevObj.registerSensorEntity("state",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1);
+    //DevObj.registerSensorEntity("alert",Hamqtt::PERTYPE_NORMAL,nullptr);
+    DevObj.registerSensorEntity("warning",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1,true);  
     DevObj.registerSensorEntity("ubat",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);  
     DevObj.registerSensorEntity("ibat",Hamqtt::PERTYPE_NORMAL,"current","A");  
     DevObj.registerSensorEntity("tbat",Hamqtt::PERTYPE_LOWSPEED,"temperature","°C",nullptr,TBMSCom::Data::MODUL_NR,true);      
     //DEBUG_LOG0(true,"registerEntity");
-    /*
-    DevObj.writeValue("soc", 88.2f); //test value
-    DevObj.publishValue("alert", "alert_text"); //test value
-    DevObj.publishValue("warning", "warning_text"); //test value
-    DevObj.writeValue("ubat", 259.1f); //test value
-    DevObj.publishValue("ibat", 9.9f); //test value
-    DevObj.writeValue("tbat", 10.0f,0); //test value
-    DevObj.writeValue("tbat", 10.1f,1); //test value
-    DevObj.writeValue("tbat", 10.2f,2); //test value    
-    DevObj.writeValue("tbat", 10.3f,3); //test value
-    DevObj.writeValue("tbat", 10.4f,4); //test value
-    DevObj.writeValue("tbat", 10.5f,5); //test value  
-   */ 
-
+    
 }
 
 void Mqtt_loopQ(void *){
@@ -59,8 +47,8 @@ void Mqtt_loopQ(void *){
 
   TBMSComobj.getData(&bmsData);
 
-  DevObj.publishValue("ibat", bmsData.i_bat); //test value
-      
+  DevObj.publishValue("ibat", bmsData.i_bat); 
+  DevObj.publishValue("state", (uint32_t)bmsData.state.all);       
 }
 
 
@@ -70,13 +58,14 @@ void Mqtt_loopS(void *){
 
   TBMSComobj.getData(&bmsData);
   for(int ind=0;ind<TBMSCom::Data::MODUL_NR;ind++){
-    DevObj.writeValue("tbat", bmsData.t[ind],ind); //test value
+    DevObj.writeValue("tbat", bmsData.t[ind],ind); 
   }
     
-  DevObj.writeValue("ubat", bmsData.u_bat); //test value
-  DevObj.writeValue("soc", bmsData.soc); //test value
-    //DevObj.publishValue("alert", bmsData.); //test value
-    //DevObj.publishValue("Water_Temp", testVal); //test value
+  DevObj.writeValue("ubat", bmsData.u_bat); 
+  DevObj.writeValue("soc", bmsData.soc); 
+  DevObj.writeValue("warning", bmsData.warning); 
+    //DevObj.publishValue("alert", bmsData.); 
+    //DevObj.publishValue("Water_Temp", testVal); 
 
     DevObj.startPublishing();
 }

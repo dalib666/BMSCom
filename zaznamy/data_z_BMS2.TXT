@@ -1,0 +1,97 @@
+
+
+
+
+BAT připojena, i_bat<0
+u_min = 3.35 V
+u_max = 4.15 V
+i_max = 30.00 A
+i_bat = 2.60 A
+ch_dsch_state = 3 -
+lcd_state = 0 -
+u_bat = 258.84 V
+t_max = 40.00 C
+cell_nr = 72 -
+ah = 1250 -
+t1 = 16.00 C
+t2 = 15.80 C
+t3 = 15.40 C
+t4 = 14.90 C
+t5 = 14.60 C
+t6 = 14.10 C
+t7 = 0.00 C
+t8 = 0.00 C
+soc= = 51 %
+state= = 448 -
+
+
+BAT připojena, i_bat=0
+u_min = 3.35 V
+u_max = 4.15 V
+i_max = 30.00 A
+i_bat = 0.00 A
+ch_dsch_state = 3 -
+lcd_state = 0 -
+u_bat = 257.86 V
+t_max = 40.00 C
+cell_nr = 72 -
+ah = 1250 -
+t1 = 16.70 C
+t2 = 16.40 C
+t3 = 15.90 C
+t4 = 15.40 C
+t5 = 15.00 C
+t6 = 14.60 C
+t7 = 0.00 C
+t8 = 0.00 C
+soc= = 49 %
+state= = 384 -
+
+BAT připojena, i_bat>0
+u_min = 3.35 V
+u_max = 4.15 V
+i_max = 30.00 A
+i_bat = 0.99 A
+ch_dsch_state = 3 -
+lcd_state = 0 -
+u_bat = 257.73 V
+t_max = 40.00 C
+cell_nr = 72 -
+ah = 1250 -
+t1 = 16.70 C
+t2 = 16.30 C
+t3 = 15.90 C
+t4 = 15.40 C
+t5 = 15.00 C
+t6 = 14.60 C
+t7 = 0.00 C
+t8 = 0.00 C
+soc= = 49 %
+state= = 384 -
+
+BAT odpojena
+u_min = 3.35 V
+u_max = 4.15 V
+i_max = 30.00 A
+i_bat = 0.00 A
+ch_dsch_state = 0 -
+lcd_state = 0 -
+u_bat = 257.77 V
+t_max = 40.00 C
+cell_nr = 72 -
+ah = 1250 -
+t1 = 99999.90 C
+t2 = 99999.90 C
+t3 = 99999.90 C
+t4 = 99999.90 C
+t5 = 15.00 C
+t6 = 14.60 C
+t7 = 0.00 C
+t8 = 0.00 C
+soc= = 49 %
+state= = 256 -
+
+
+000100000000    BAT odpojena
+000110000000    BAT připojena, i_bat>0
+000111000000    BAT připojena, i_bat<0

@@ -15,7 +15,7 @@
 class TBMSCom{
     static const   int MIN_FRAME_SPACE=8u;
     static const int CHECK_RX_TIMEOUT_PERIOD=1000u;    //[ms]  period of checking RX timeout
-    static const int RX_TIMEOUT = 10000;                //[ms]  RX timeout
+    static const int RX_TIMEOUT = 15000u;              //[ms]  RX timeout
     //byte m_rxBufSH[RXBUFER_LEN];
     HardwareSerial * m_serialPtr;
     int m_newRxDatalen;
@@ -53,15 +53,16 @@ class TBMSCom{
     */ 
     struct Data{
         typedef struct StatesBit{
-            uint16_t MOS_tm:1;      // MOS temp. is under zero
-            uint16_t sw_state:1;    // switche state
-            uint16_t sign:1;        // sign of ??
-            uint16_t discharged:1;  // indication of discharged battery
-            uint16_t overdischarged:1;  // indication of very discharged battery 
-            uint16_t overcurrent:1;  // indication of overcurrent
-            uint16_t unknown:1;     // unknown var
-            uint16_t overloaded:1;  // indication of overloading
             uint16_t unknown1:1;    // unknown var
+            uint16_t overloaded:1;  // indication of overloading
+            uint16_t unknown:1;     // unknown var
+            uint16_t overcurrent:1;  // indication of overcurrent
+            uint16_t overdischarged:1;  // indication of very discharged battery 
+            uint16_t discharged:1;  // indication of discharged battery
+            uint16_t sign:1;        // sign of ?? bit6
+            uint16_t sw_state:1;    // switche state, bit7
+            uint16_t MOS_tm:1;      // MOS temp. is under zero
+            uint16_t res:7;
         }StatesBit;
         typedef union StateDef{
             StatesBit bit;
@@ -103,8 +104,10 @@ class TBMSCom{
         // frame 10
         // frame 17     
         // frame 16
-        uint16_t    ch_dsch_state;      
-
+        uint16_t    ch_dsch_state;  
+        uint16_t    lcd_state;    
+        const char * warning;
+        const char * fault;
     }m_data;
     
     void main();    

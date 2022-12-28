@@ -74,6 +74,7 @@ void TBMSCom::main(){
 
                     case 16:
                         m_data.ch_dsch_state=b_to_w_be(rxBuff,14);
+                        m_data.lcd_state=b_to_w_be(rxBuff,16);
                         m_data.frameRxCntr[frameNumber]++;
                         m_data.frameRxTime[frameNumber]=millis();
                     break;    
@@ -120,8 +121,25 @@ void TBMSCom::main(){
                         if(!b_to_w_be_check(frameNumber,m_data.soc,rxBuff,8,0,100))
                             break;
                         //m_data.state.all=b_to_w_be(rxBuff,14);
-                        if(!b_to_w_be_check(frameNumber,m_data.state.all,rxBuff,14,0,512))
+                        if(!b_to_w_be_check(frameNumber,m_data.state.all,rxBuff,16,0,512))
                             break;
+
+                        if(m_data.state.bit.overdischarged)
+                            m_data.warning="Batery is very discharged";
+                        else
+                        if(m_data.state.bit.discharged)
+                            m_data.warning="Batery is discharged";
+                        else    
+                        if(!m_data.state.bit.sw_state)
+                            m_data.warning="Batery is disconnected from FV inverter";
+                        else
+                            m_data.warning="no warning";
+                        /*    
+                        uint16_t overloaded:1;  // indication of overloading
+            uint16_t unknown:1;     // unknown var
+            uint16_t overcurrent:1;  // indication of overcurrent      
+            uint16_t MOS_tm:1;      // MOS temp. is under zero
+            uint16_t res:7;*/
                         m_data.frameRxCntr[frameNumber]++;
                         m_data.frameRxTime[frameNumber]=millis();  
                     break;
@@ -151,6 +169,9 @@ void TBMSCom::main(){
                        // m_data.i_bat=b_to_w_be(rxBuff,14) * 0.01;   // [A] actual current of the battery 
                         if(!b_to_w_be_check(frameNumber,m_data.i_bat,rxBuff,14,0.01f,0,30))
                             break;                         
+
+                        if(m_data.state.bit.sign)
+                            m_data.i_bat = -m_data.i_bat;
                         m_data.unknown=b_to_w_be(rxBuff,16); // ??
                         m_data.frameRxCntr[frameNumber]++;
                         m_data.frameRxTime[frameNumber]=millis();
@@ -252,6 +273,7 @@ void TBMSCom::initData(int frameNumber){
 
         case 16:
             m_data.ch_dsch_state=NODATA_UINT16;
+            m_data.lcd_state=NODATA_UINT16;
             break;
 
         case 11:

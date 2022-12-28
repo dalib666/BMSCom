@@ -126,6 +126,7 @@ void handleRoot() {
   addOneLine(message, "i_max",TBMSComobj.m_data.i_max, "A");
   addOneLine(message, "i_bat",TBMSComobj.m_data.i_bat, "A");
   addOneLine(message, "ch_dsch_state",TBMSComobj.m_data.ch_dsch_state);
+  addOneLine(message, "lcd_state",TBMSComobj.m_data.lcd_state);
   addOneLine(message, "u_bat",TBMSComobj.m_data.u_bat, "V");
   addOneLine(message, "t_max",TBMSComobj.m_data.t_max, "C");
   addOneLine(message, "cell_nr",TBMSComobj.m_data.cell_nr);
@@ -136,6 +137,8 @@ void handleRoot() {
   }
 
   addOneLine(message, "soc=",TBMSComobj.m_data.soc,"%");
+  
+  //TBMSComobj.m_data.state.bit.unknown1=1;
   addOneLine(message, "state=",TBMSComobj.m_data.state.all);
 
   for(int ind=0; ind < TBMSCom::Data::U_CELL_NR; ind++ ){

@@ -39,6 +39,7 @@ void setup() {
   pinMode(RELE_VENTILATION_PIN, OUTPUT);
   pinMode(RELE_MAIN_PIN, OUTPUT);
   pinMode(RELE_RESERVE_PIN, OUTPUT);
+  pinMode(WIFICONF_BUT_PIN, INPUT_PULLUP);
 
   digitalWrite(BUILTIN_LED_PIN, LED_ACTIVELEV);  //On - indicate is starting
   digitalWrite(GREEN_LED_PIN, !LED_ACTIVELEV);  
@@ -73,7 +74,7 @@ void setup() {
 #ifdef DEBUG_MODE
  if(false){//suppress info from buttom, set standard connect to WIFI 
 #else
- if(digitalRead(WIFICONF_BUT_PIN)){
+ if(!digitalRead(WIFICONF_BUT_PIN)){
 #endif
   DEBUG_PART(Serial.println("startConfigPortal")); 
   //create config portal
@@ -177,8 +178,8 @@ void temp_control(void *){
 
 void checkNetConnection(void *){
   if(PingErrCntr >=3){
-     // DebugCntr++;
-      ESP.restart(); // not possible communicate with net, may be some error, reset system
+    
+    ESP.restart(); // not possible communicate with net, may be some error, reset system
   }
   Pinger_.Ping(WiFi.gatewayIP());   
 }

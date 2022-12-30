@@ -14,7 +14,7 @@
 #include "tbmscom.hpp"
 
 
-#define SW_VERSION  "V1.0.0"
+#define SW_VERSION  "V1.1.0"
 #define COMP_DATE __DATE__;
 #define COMP_TIME __TIME__;
 #define LOWLOOP_TIME  1000           //[ms]
@@ -39,9 +39,10 @@
 #define LED_ACTIVELEV false
 #define RELE_ACTIVELEV false
 
+#define WIFICONF_BUT_PIN      9     // button for WIFI conf.
 /*#define STATUS_LED_PIN      12    // operational status LED
 #define WIFISTATUS_LED_PIN  16    // wifi status LED
-#define WIFICONF_BUT_PIN  4       // button for WIFI conf.
+
 #define LED_ACTIVELEV false
 */
 

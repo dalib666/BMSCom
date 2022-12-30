@@ -63,12 +63,12 @@ void TBMSCom::main(){
     int maxInd=0;
     if(m_startFrame && m_serialPtr->available()){
         m_startFrame = false;
-        DebugCntr=2;
+        //DebugCntr=2;
         int frameNumber=m_serialPtr->read();
         if(frameNumber >0 && frameNumber <= Data::FRAMES_MAXNR){           //> 0
             int readout = m_serialPtr->readBytes(rxBuff,Data::FRAMEDATALEN);
             m_seekFrameSpace=true;
-            DebugCntr=3;
+          //  DebugCntr=3;
             if(readout == Data::FRAMEDATALEN && (millis() - m_startTime) < 20){    
                 switch(frameNumber){
 
@@ -243,7 +243,7 @@ void TBMSCom::period(){
         uint32_t del_Time=millis() - m_time1;
         if(del_Time >= MIN_FRAME_SPACE){
             m_seekFrameSpace = false;
-            DebugCntr=del_Time;
+            //DebugCntr=del_Time;
             m_startFrame=true;
             m_startTime=millis();
         }

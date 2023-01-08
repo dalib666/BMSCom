@@ -4,7 +4,7 @@
 #include "Global.h" 
 #include "DebugFnc.h"  
 
-IPAddress BrokerIP(192,168,1,2);     
+IPAddress BrokerIP(192,168,1,109);     
 char MqttUserName[] = "homeassistant"; 
 char MqttPass[] = "ol3uuNeek6ke7eich8aiva7ZoxoiVei1aiteith0aighae0ieP7pahFaNgeiP8de";
 #define SW_VERSION "1.0.1"
@@ -37,8 +37,9 @@ void Mqtt_init(){
     DevObj.registerSensorEntity("ubat",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);  
     DevObj.registerSensorEntity("ibat",Hamqtt::PERTYPE_NORMAL,"current","A");  
     DevObj.registerSensorEntity("tbat",Hamqtt::PERTYPE_LOWSPEED,"temperature","°C",nullptr,TBMSCom::Data::MODUL_NR,true);      
-    //DEBUG_LOG0(true,"registerEntity");
-    
+    DevObj.registerSensorEntity("u_cellMax",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);     
+    DevObj.registerSensorEntity("u_cellMin",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);   
+    //DEBUG_LOG0(true,"registerEntity");    
 }
 
 void Mqtt_loopQ(void *){
@@ -48,7 +49,7 @@ void Mqtt_loopQ(void *){
   TBMSComobj.getData(&bmsData);
 
   DevObj.publishValue("ibat", bmsData.i_bat); 
-  DevObj.publishValue("state", (uint32_t)bmsData.state.all);       
+  DevObj.publishValue("state", (uint32_t)bmsData.state);       
 }
 
 
@@ -60,7 +61,8 @@ void Mqtt_loopS(void *){
   for(int ind=0;ind<TBMSCom::Data::MODUL_NR;ind++){
     DevObj.writeValue("tbat", bmsData.t[ind],ind); 
   }
-    
+  DevObj.writeValue("u_cellMin", bmsData.u_cellMin);     
+  DevObj.writeValue("u_cellMax", bmsData.u_cellMax); 
   DevObj.writeValue("ubat", bmsData.u_bat); 
   DevObj.writeValue("soc", bmsData.soc); 
   DevObj.writeValue("warning", bmsData.warning); 

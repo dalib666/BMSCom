@@ -13,6 +13,8 @@
 #define b_to_w_be(buf,ind_) (buf[ind_]<<8 | buf[ind_+1])
 
 
+#define SW_STATE_MASK 0x80
+
 extern int DebugCntr;
 
 
@@ -120,17 +122,17 @@ void TBMSCom::main(){
                         //m_data.soc=b_to_w_be(rxBuff,8);
                         if(!b_to_w_be_check(frameNumber,m_data.soc,rxBuff,8,0,100))
                             break;
-                        //m_data.state.all=b_to_w_be(rxBuff,14);
-                        if(!b_to_w_be_check(frameNumber,m_data.state.all,rxBuff,16,0,512))
+                        //m_data.state=b_to_w_be(rxBuff,14);
+                        if(!b_to_w_be_check(frameNumber,m_data.state,rxBuff,16,0,512))
                             break;
 
-                        if(m_data.state.bit.overdischarged)
+                        if(m_data.state & Data::OVERDISCHARGED_MASK)
                             m_data.warning="Batery is very discharged";
                         else
-                        if(m_data.state.bit.discharged)
-                            m_data.warning="Batery is discharged";
-                        else    
-                        if(!m_data.state.bit.sw_state)
+                        //if(m_data.state.bit.discharged)
+                        //    m_data.warning="Batery is discharged";
+                        //else    
+                        if(!(m_data.state & SW_STATE_MASK))
                             m_data.warning="Batery is disconnected from FV inverter";
                         else
                             m_data.warning="no warning";
@@ -170,7 +172,7 @@ void TBMSCom::main(){
                         if(!b_to_w_be_check(frameNumber,m_data.i_bat,rxBuff,14,0.01f,0,30))
                             break;                         
 
-                        if(m_data.state.bit.sign)
+                        if(m_data.state & Data::SIGN_MASK)
                             m_data.i_bat = -m_data.i_bat;
                         m_data.unknown=b_to_w_be(rxBuff,16); // ??
                         m_data.frameRxCntr[frameNumber]++;
@@ -224,6 +226,8 @@ void TBMSCom::main(){
                    initData(frameInd);
                 }
             }
+            find_u_cellMax();
+            find_u_cellMin();
         }
     }
     m_seekFrameSpace=true;
@@ -285,6 +289,7 @@ void TBMSCom::initData(int frameNumber){
             for(int ind= maxInd - 9; ind < maxInd; ind++){
                m_data.u_cell[ind]=  NODATA_FL; 
             }
+
             break;
 
         case 10:
@@ -298,7 +303,7 @@ void TBMSCom::initData(int frameNumber){
             m_data.u_cell[46]=NODATA_FL;
             m_data.u_cell[47]=NODATA_FL;
             m_data.soc=NODATA_UINT16;
-            m_data.state.all=NODATA_UINT16;
+            m_data.state=NODATA_UINT16;
             break;    
 
         case 2:
@@ -321,4 +326,25 @@ void TBMSCom::initData(int frameNumber){
     }
 
 }
- 
+
+void TBMSCom::find_u_cellMax(){
+    float max=0;
+    if(m_data.cell_nr > Data::U_CELL_NR)
+        return;
+    for(int ind=0;ind < m_data.cell_nr;ind++){
+        if(max < m_data.u_cell[ind])
+            max=m_data.u_cell[ind];
+    }    
+    m_data.u_cellMax=max;
+}
+
+void TBMSCom::find_u_cellMin(){
+    float min=5;
+    if(m_data.cell_nr > Data::U_CELL_NR)
+        return;
+    for(int ind=0;ind < m_data.cell_nr;ind++){
+        if(min > m_data.u_cell[ind])
+            min=m_data.u_cell[ind];
+    }    
+    m_data.u_cellMin=min;
+}

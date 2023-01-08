@@ -40,6 +40,9 @@ class TBMSCom{
     */
     void initData(int frameNumber);
 
+    void find_u_cellMax();
+    void find_u_cellMin();
+
     /**
      * init all data  */
     void initAllData();
@@ -52,22 +55,14 @@ class TBMSCom{
     * Must be called from main
     */ 
     struct Data{
-        typedef struct StatesBit{
-            uint16_t unknown1:1;    // unknown var
-            uint16_t overloaded:1;  // indication of overloading
-            uint16_t unknown:1;     // unknown var
-            uint16_t overcurrent:1;  // indication of overcurrent
-            uint16_t overdischarged:1;  // indication of very discharged battery 
-            uint16_t discharged:1;  // indication of discharged battery
-            uint16_t sign:1;        // sign of ?? bit6
-            uint16_t sw_state:1;    // switche state, bit7
-            uint16_t MOS_tm:1;      // MOS temp. is under zero
-            uint16_t res:7;
-        }StatesBit;
-        typedef union StateDef{
-            StatesBit bit;
-            uint16_t all;
-        }StateDef;
+        // AND mask of state signal
+        static const int OVERLOADED_MASK= 0x2;  // indication of overloading
+        static const int OVERCURRENT_MASK=0x8;       // indication of overcurrent
+        static const int OVERDISCHARGED_MASK=0x10;   // indication of very discharged battery
+        static const int SIGN_MASK= 0x40;       // sign of ?? 
+        static const int SW_STATE_MASK= 0x80;   // switche state
+        static const int MOS_TM_MASK= 0x100;    // MOS temp. is under zero
+
         static const int U_CELL_NR=93; // number of cells
         static const int MODUL_NR=8; // max number of battery moduls
         static const int FRAMES_NR=18;
@@ -92,9 +87,11 @@ class TBMSCom{
       
         // frame  3...8, 11, 12,13, 14, 15, 16-part
         float u_cell[U_CELL_NR]; //[V] cells voltage (0.001) 
+        float u_cellMax; //[V] actual most maximum cell voltage (0.001) 
+        float u_cellMin; //[V] actual most minimum cell voltage (0.001)
         // frame 8end
         uint16_t soc;    //[%] State of the charge (1)
-        StateDef state; // warning, state ind.
+        uint16_t state; // warning, state ind., bit oriented, see above
         // frame 9
         //float ur1;   //[V] recovery voltage ??? hostitelské úložiště obnovovací napětí nabíjení
         //float ur2;  //[V] ??? Napětí obnovy vybití dvoubajtového hostitelského úložiště

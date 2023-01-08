@@ -130,6 +130,8 @@ void handleRoot() {
   addOneLine(message, "u_bat",TBMSComobj.m_data.u_bat, "V");
   addOneLine(message, "t_max",TBMSComobj.m_data.t_max, "C");
   addOneLine(message, "cell_nr",TBMSComobj.m_data.cell_nr);
+  addOneLine(message, "u_cellMax",TBMSComobj.m_data.u_cellMax);
+  addOneLine(message, "u_cellMin",TBMSComobj.m_data.u_cellMin);  
   addOneLine(message, "ah",TBMSComobj.m_data.ah);
 
   for(int ind=0; ind < TBMSCom::Data::MODUL_NR; ind++ ){
@@ -139,7 +141,7 @@ void handleRoot() {
   addOneLine(message, "soc=",TBMSComobj.m_data.soc,"%");
   
   //TBMSComobj.m_data.state.bit.unknown1=1;
-  addOneLine(message, "state=",TBMSComobj.m_data.state.all);
+  addOneLine(message, "state=",TBMSComobj.m_data.state);
 
   for(int ind=0; ind < TBMSCom::Data::U_CELL_NR; ind++ ){
 
@@ -182,9 +184,9 @@ void handle_preupdate(){
 void handleDiagData() {
  
   String message = "Debug Info: \n";
+  message +="========================================================\n";  
+  message +="Wifi - RSSI: "; message += WiFi.RSSI(); message +="dBm \n";
   message +="========================================================\n";
- 
-
   message+= "frameErCntr = ";
   for(int i=0;i<TBMSCom::Data::FRAMES_NR;i++){
     message+= (String)TBMSComobj.m_data.frameErCntr[i] + (String)" | ";

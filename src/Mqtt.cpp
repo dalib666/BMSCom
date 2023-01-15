@@ -7,10 +7,9 @@
 IPAddress BrokerIP(192,168,1,109);     
 char MqttUserName[] = "homeassistant"; 
 char MqttPass[] = "ol3uuNeek6ke7eich8aiva7ZoxoiVei1aiteith0aighae0ieP7pahFaNgeiP8de";
-#define SW_VERSION "1.0.1"
 #define HW_VERSION "1.0"
 #define MODEL "BatCC01"
-#define EXPIRATION_TIME 3    //[sec] expire time in HA after lost data
+#define EXPIRATION_TIME 3    //[sec] multiplier of parameter "perType" to compute expirtion time  in HA after lost data
 //topics - published
 
 
@@ -42,34 +41,38 @@ void Mqtt_init(){
     //DEBUG_LOG0(true,"registerEntity");    
 }
 
+static bool PublisMqttdata=false;
 void Mqtt_loopQ(void *){
-  
-  TBMSCom::Data bmsData;
+  if(millis() > 20000ul || PublisMqttdata) {    // to wait some time for valid data from BMS
+    PublisMqttdata=true;
+    TBMSCom::Data bmsData;
 
-  TBMSComobj.getData(&bmsData);
+    TBMSComobj.getData(&bmsData);
 
-  DevObj.publishValue("ibat", bmsData.i_bat); 
-  DevObj.publishValue("state", (uint32_t)bmsData.state);       
+    DevObj.publishValue("ibat", bmsData.i_bat); 
+    DevObj.publishValue("state", (uint32_t)bmsData.state);   
+  }    
 }
 
 
 void Mqtt_loopS(void *){
-  
-  TBMSCom::Data bmsData;
+  if(PublisMqttdata) {
+    TBMSCom::Data bmsData;
 
-  TBMSComobj.getData(&bmsData);
-  for(int ind=0;ind<TBMSCom::Data::MODUL_NR;ind++){
-    DevObj.writeValue("tbat", bmsData.t[ind],ind); 
-  }
-  DevObj.writeValue("u_cellMin", bmsData.u_cellMin);     
-  DevObj.writeValue("u_cellMax", bmsData.u_cellMax); 
-  DevObj.writeValue("ubat", bmsData.u_bat); 
-  DevObj.writeValue("soc", bmsData.soc); 
-  DevObj.writeValue("warning", bmsData.warning); 
-    //DevObj.publishValue("alert", bmsData.); 
-    //DevObj.publishValue("Water_Temp", testVal); 
+    TBMSComobj.getData(&bmsData);
+    for(int ind=0;ind<TBMSCom::Data::MODUL_NR;ind++){
+      DevObj.writeValue("tbat", bmsData.t[ind],ind); 
+    }
+    DevObj.writeValue("u_cellMin", bmsData.u_cellMin);     
+    DevObj.writeValue("u_cellMax", bmsData.u_cellMax); 
+    DevObj.writeValue("ubat", bmsData.u_bat); 
+    DevObj.writeValue("soc", bmsData.soc); 
+    DevObj.writeValue("warning", bmsData.warning); 
+      //DevObj.publishValue("alert", bmsData.); 
+      //DevObj.publishValue("Water_Temp", testVal); 
 
-    DevObj.startPublishing();
+      DevObj.startPublishing();
+  }    
 }
 
  //publishConfig(DEVICE_INDEX_NAME,"Req Power",nullptr,PUB_CONFTOPIC2,"W",nullptr,"{{value_json.reqPower}}",PUB_TOPIC2, SUB_TOPIC2);

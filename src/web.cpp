@@ -30,6 +30,7 @@ void handleRoot();
 void handle_preupdate();
 void handle_log();
 void handleDiagData();
+void handle_reset();
 
 /*
 void handleCmd();
@@ -38,7 +39,7 @@ void handle_SaveP();
 void handle_setP();
 void handle_showP();
 void handle_setDefP();
-void handle_reset();
+
 
 void handle_help();
 void sendFilePage(String pagefileName);
@@ -53,7 +54,7 @@ void web_init() {
     WebServer.on("/preupdate",  handle_preupdate);  
     WebServer.on("/log",  handle_log);
     WebServer.on("/diag",  handleDiagData);  
- 
+    WebServer.on("/reset",  handle_reset);
     /*
     WebServer.on("/help", handle_help);
     WebServer.on("/cmd", handleCmd);
@@ -64,7 +65,7 @@ void web_init() {
     WebServer.on("/setP",  handle_setP);   
     WebServer.on("/showP",  handle_showP); 
     WebServer.on("/setDefP",  handle_setDefP); 
-    WebServer.on("/reset",  handle_reset); 
+  
       
     WebServer.on("/upload", HTTP_GET, []() {                  // if the client requests the upload page
       String s = Update_page;
@@ -217,6 +218,14 @@ void handleDiagData() {
   */
   
   WebServer.send(200, "text/plain", message);
+}
+
+
+void handle_reset(){
+  String message = "BMSCom is reseted \n"; 
+  WebServer.send(200, "text/plain", message);  
+  delay(1000); // to give time to send responce
+  ESP.restart();
 }
 
 /*

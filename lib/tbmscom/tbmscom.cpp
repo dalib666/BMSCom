@@ -218,16 +218,18 @@ void TBMSCom::main(){
         }
     }
     else{
-        if((millis() - m_lastCheckRunTime) > CHECK_RX_TIMEOUT_PERIOD && millis() > RX_TIMEOUT){
-            m_lastCheckRunTime=millis();
-            unsigned long limitTime=millis() - RX_TIMEOUT;
-            for(int frameInd=1;frameInd< Data::FRAMES_NR;frameInd++){
-                if(millis() > m_data.frameRxTime[frameInd] && m_data.frameRxTime[frameInd] < limitTime){
-                   initData(frameInd);
-                }
-            }
+        if((millis() - m_lastCheckRunTime) > CHECK_RX_TIMEOUT_PERIOD){
             find_u_cellMax();
             find_u_cellMin();
+            if(millis() > RX_TIMEOUT){
+                m_lastCheckRunTime=millis();
+                unsigned long limitTime=millis() - RX_TIMEOUT;
+                for(int frameInd=1;frameInd< Data::FRAMES_NR;frameInd++){
+                    if(millis() > m_data.frameRxTime[frameInd] && m_data.frameRxTime[frameInd] < limitTime){
+                    initData(frameInd);
+                    }
+                }
+            }    
         }
     }
     m_seekFrameSpace=true;
@@ -289,7 +291,8 @@ void TBMSCom::initData(int frameNumber){
             for(int ind= maxInd - 9; ind < maxInd; ind++){
                m_data.u_cell[ind]=  NODATA_FL; 
             }
-
+            m_data.u_cellMin=NODATA_FL;
+            m_data.u_cellMax=NODATA_FL;
             break;
 
         case 10:
@@ -304,6 +307,8 @@ void TBMSCom::initData(int frameNumber){
             m_data.u_cell[47]=NODATA_FL;
             m_data.soc=NODATA_UINT16;
             m_data.state=NODATA_UINT16;
+            m_data.u_cellMin=NODATA_FL;
+            m_data.u_cellMax=NODATA_FL;
             break;    
 
         case 2:
@@ -320,7 +325,9 @@ void TBMSCom::initData(int frameNumber){
             maxInd=(frameNumber-2)*9;
             for(int ind= maxInd - 9; ind < maxInd; ind++){
                 m_data.u_cell[ind]=NODATA_FL;
-            }      
+            }
+            m_data.u_cellMin=NODATA_FL;
+            m_data.u_cellMax=NODATA_FL;      
             break;
 
     }
@@ -340,11 +347,22 @@ void TBMSCom::find_u_cellMax(){
 
 void TBMSCom::find_u_cellMin(){
     float min=5;
+    float avrVal=0;
+    int validValues=0;
     if(m_data.cell_nr > Data::U_CELL_NR)
         return;
     for(int ind=0;ind < m_data.cell_nr;ind++){
-        if(min > m_data.u_cell[ind])
-            min=m_data.u_cell[ind];
-    }    
-    m_data.u_cellMin=min;
+        if(m_data.u_cell[ind] <  NODATA_FL){
+            validValues++;
+            if(min > m_data.u_cell[ind])
+                min=m_data.u_cell[ind];
+            avrVal+= m_data.u_cell[ind];   
+        }
+    }
+    if(m_data.cell_nr == NODATA_UINT16 ||  validValues != m_data.cell_nr)
+        return; //compute only from all valid cells voltages
+    avrVal = avrVal/validValues;
+    // correction of random error value from itself BMS    
+    if(fabs(avrVal - min) < 0.05f)
+        m_data.u_cellMin=min;
 }

@@ -187,7 +187,13 @@ void handleDiagData() {
   String message = "Debug Info: \n";
   message +="========================================================\n";  
   message +="Wifi - RSSI: "; message += WiFi.RSSI(); message +="dBm \n";
-  message +="========================================================\n";
+  message+="Memory info:\n";
+  message+="Free heap memory:"; message+=ESP.getFreeHeap(); message +="\n";
+  message+="Heap fragmentation:"; message+=ESP.getHeapFragmentation(); message +="\n\n"; //needs higher Core version
+
+  message+="Reset reason:"; message+=ESP.getResetReason(); message +="\n\n";
+
+
   message+= "frameErCntr = ";
   for(int i=0;i<TBMSCom::Data::FRAMES_NR;i++){
     message+= (String)TBMSComobj.m_data.frameErCntr[i] + (String)" | ";

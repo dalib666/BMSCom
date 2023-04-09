@@ -6,3 +6,4 @@ extern void Mqtt_init();
 extern void Mqtt_main();
 extern void Mqtt_loopQ(void *);
 extern void Mqtt_loopS(void *);
+bool MQTT_Check();

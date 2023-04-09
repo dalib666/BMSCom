@@ -100,11 +100,11 @@ void setup() {
     DEBUG_PART(Serial.println(""));
   }
   Mqtt_init(); 
-   
+
   adk::set_interval(temp_control, 1000);           // function call
   adk::set_interval(Mqtt_loopQ, 1000);           // function call
   adk::set_interval(Mqtt_loopS, 20000);           // function call
-  adk::set_interval(checkNetConnection, 3000);    //  
+  adk::set_interval(checkNetConnection, 1000);    //  
 
 
   while(Serial.available()) {Serial.read();} // clear any chaos before 
@@ -168,7 +168,7 @@ void loop() {
 void temp_control(void *){
   static int ReleToSwitch=0;
   static bool BuiltInLed=false;
-  ESP.wdtFeed();
+  //ESP.wdtFeed();
 
   BuiltInLed=!BuiltInLed;    
   digitalWrite(BUILTIN_LED_PIN, BuiltInLed);  
@@ -177,11 +177,18 @@ void temp_control(void *){
 }
 
 void checkNetConnection(void *){
+/*
   if(PingErrCntr >=3){
     
     ESP.restart(); // not possible communicate with net, may be some error, reset system
   }
   Pinger_.Ping(WiFi.gatewayIP());   
+*/
+  if(millis() < START_TIME_OF_MQTT_MONITORING || MQTT_Check())
+    ESP.wdtFeed();  // HW WD do not work
+  else
+    ESP.restart();  
+
 }
 
 /* Test Relay

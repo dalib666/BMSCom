@@ -14,7 +14,7 @@
 #include "tbmscom.hpp"
 
 
-#define SW_VERSION  "V1.2.0"
+#define SW_VERSION  "V1.2.1"
 #define COMP_DATE __DATE__;
 #define COMP_TIME __TIME__;
 #define LOWLOOP_TIME  1000           //[ms]
@@ -27,7 +27,7 @@
 #endif
 #define CPUINTERFACE_SPEED 9600
 #define HWTIMER_PERIOD 2  //[ms] period of HW timer ISR
-
+#define START_TIME_OF_MQTT_MONITORING 60000ul //[ms]
 
 #define BUILTIN_LED_PIN     2   // internal LED, RED led
 #define GREEN_LED_PIN     2   // internal LED, GREEN led

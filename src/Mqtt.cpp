@@ -67,13 +67,27 @@ void Mqtt_loopS(void *){
     DevObj.writeValue("u_cellMin", bmsData.u_cellMin);     
     DevObj.writeValue("u_cellMax", bmsData.u_cellMax); 
     DevObj.writeValue("ubat", bmsData.u_bat); 
-    DevObj.writeValue("soc", bmsData.soc); 
+    DevObj.writeValue("soc", (uint32_t)bmsData.soc); 
     DevObj.writeValue("warning", bmsData.warning); 
       //DevObj.publishValue("alert", bmsData.); 
       //DevObj.publishValue("Water_Temp", testVal); 
 
       DevObj.startPublishing();
   }    
+}
+
+
+bool MQTT_Check(){
+  //if(!Params::isValid())
+  //  return true;
+  unsigned long lastConTime=DevObj.connected();
+  long deltaTime= millis() - lastConTime;
+  DebugCntr=(int)deltaTime;
+  if((millis() < lastConTime) || (deltaTime < 10000l))
+    return true;
+  else
+    return false;
+
 }
 
  //publishConfig(DEVICE_INDEX_NAME,"Req Power",nullptr,PUB_CONFTOPIC2,"W",nullptr,"{{value_json.reqPower}}",PUB_TOPIC2, SUB_TOPIC2);

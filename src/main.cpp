@@ -53,6 +53,7 @@ void setup() {
   TBMSComobj.init(&Serial,CPUINTERFACE_SPEED);
 
   DEBUG_PART(Serial.println("Starting..."));
+  WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
   delay(10);
   /*
   if(!SPIFFS.begin()){
@@ -72,7 +73,7 @@ void setup() {
   //fetches ssid and pass from eeprom and tries to connect
   //if it does not connect it starts an access point with the specified name
   //and goes into a blocking loop awaiting configuration
-#ifdef DEBUG_MODE
+#ifndef REAL_TARGET_HW
  if(false){//suppress info from buttom, set standard connect to WIFI 
 #else
  if(digitalRead(WIFICONF_BUT_PIN)==WIFICONF_BUT_ACTLEV){

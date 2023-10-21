@@ -5,7 +5,7 @@
 #include <ESP8266HTTPClient.h>
 //#include <ESP8266mDNS.h>
 //#include "mdns.h"                //alternatice MDNS against ESP8266mDNS, possible implement also client side of MDNS
-#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
+//#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 #include <ESP8266HTTPClient.h>
 #include <ESP8266TimerInterrupt.h>
 #include <ardukit.h>
@@ -52,7 +52,9 @@ void setup() {
   TBMSComobj.init(&Serial,CPUINTERFACE_SPEED);
 
   DEBUG_PART(Serial.println("Starting..."));
-  delay(10);
+  DEBUG_PART(Serial.println("Waiting for pressing Wifi Config button...")); //must be pulled down after start up of FW
+
+  delay(3000);
   /*
   if(!SPIFFS.begin()){
     DEBUG_PART(Serial.println("SPIFFS start error"));
@@ -62,29 +64,20 @@ void setup() {
   */
   
 
-  //WiFiManager
-  //Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;
-  wifiManager.setConnectTimeout(30);
+
 
 
   //fetches ssid and pass from eeprom and tries to connect
   //if it does not connect it starts an access point with the specified name
   //and goes into a blocking loop awaiting configuration
-#ifdef DEBUG_MODE
- if(false){//suppress info from buttom, set standard connect to WIFI 
-#else
- if(!digitalRead(WIFICONF_BUT_PIN)){
-#endif
-  DEBUG_PART(Serial.println("startConfigPortal")); 
-  //create config portal
-  wifiManager.setConfigPortalTimeout(300); 
-  wifiManager.startConfigPortal("BMS_Com");
- } 
- else{ 
-   wifiManager.setConfigPortalTimeout(1); // suppress config portal  - set minimal time of config portal
-  // try to connect with last credentials, if not possible do not create config portal
-  if(wifiManager.autoConnect()){
+  WiFi.begin("Kuchta_N", "velky123");
+  int con_cntr=0;
+  while (WiFi.status() != WL_CONNECTED | con_cntr < 10){
+    delay(500);
+    con_cntr++;
+    DEBUG_PART(Serial.print("."));
+  }
+  if(WiFi.status() == WL_CONNECTED){ 
     DEBUG_PART(Serial.println(""));
     DEBUG_PART(Serial.print("Connected..."));
     DEBUG_PART(Serial.print("IP address: "));
@@ -96,9 +89,9 @@ void setup() {
     }
     else{
       DEBUG_PART(Serial.println("Not Connected into WIFI."));
-    } 
+  } 
     DEBUG_PART(Serial.println(""));
-  }
+  
   Mqtt_init(); 
 
   adk::set_interval(temp_control, 1000);           // function call
@@ -169,7 +162,7 @@ void temp_control(void *){
   static int ReleToSwitch=0;
   static bool BuiltInLed=false;
   //ESP.wdtFeed();
-
+  // DEBUG_LOG(true,"WIFICONF_BUT_PIN=",digitalRead(WIFICONF_BUT_PIN)); 
   BuiltInLed=!BuiltInLed;    
   digitalWrite(BUILTIN_LED_PIN, BuiltInLed);  
   //uint32_t actTime=0;

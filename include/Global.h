@@ -39,7 +39,8 @@
 #define LED_ACTIVELEV false
 #define RELE_ACTIVELEV false
 
-#define WIFICONF_BUT_PIN      9     // button for WIFI conf.
+#define WIFICONF_BUT_PIN      0     // button for WIFI conf.
+#define WIFICONF_BUT_ACTLEV   false
 /*#define STATUS_LED_PIN      12    // operational status LED
 #define WIFISTATUS_LED_PIN  16    // wifi status LED
 

@@ -54,7 +54,8 @@ void setup() {
 
   DEBUG_PART(Serial.println("Starting..."));
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-  delay(10);
+  DEBUG_PART(Serial.println("Waiting for possible pressing WIFI Configuration."));
+  delay(3000);          
   /*
   if(!SPIFFS.begin()){
     DEBUG_PART(Serial.println("SPIFFS start error"));
@@ -103,7 +104,7 @@ void setup() {
   }
   Mqtt_init(); 
 
-  //adk::set_interval(temp_control, 1000);           // function call
+  adk::set_interval(temp_control, 1000);           // function call
   adk::set_interval(Mqtt_loopQ, 1000);           // function call
   adk::set_interval(Mqtt_loopS, 20000);           // function call
   adk::set_interval(checkNetConnection, 1000);    //  
@@ -168,16 +169,17 @@ void loop() {
 }
 
 void temp_control(void *){
-  static int ReleToSwitch=0;
 
   //ESP.wdtFeed();
   LifeLed=!LifeLed;    
   digitalWrite(GREEN_LED_PIN, LifeLed);  
 
-  if((TBMSComobj.m_data.t_max < 50) && (TBMSComobj.m_data.t_max > -20) && TBMSComobj.m_data.u_min > CELL_CRIT_VALUE && TBMSComobj.m_data.u_min < 5.0f){
-    hystReg(TBMSComobj.m_data.t_max,TEMP_REG_HTEMP-TEMP_REG_HYST/2,TEMP_REG_HTEMP+TEMP_REG_HYST/2,RELE_HEATING_PIN,Rele_heating);
+  if((TBMSComobj.m_data.t_max < 50) && (TBMSComobj.m_data.t_max > -20) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
+     DEBUG_PART(Serial.println("Regulation is runing"));
+    hystReg(TBMSComobj.m_data.t_max,TEMP_REG_HTEMP-TEMP_REG_HYST/2.0f,TEMP_REG_HTEMP+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
   }
   else{
+    DEBUG_PART(Serial.println("Regulation is off"));
     //invalid input data or other cond. not met
     CritErrorLed=!CritErrorLed;    
     digitalWrite(RED_LED_PIN, CritErrorLed);  

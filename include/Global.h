@@ -48,7 +48,7 @@
 */
 #define TEMP_REG_HTEMP  15 // C
 #define TEMP_REG_HYST   2 // C
-#define CELL_CRIT_VALUE 3.33  //[V] below value is heating off
+#define CELL_CRIT_VALUE 3.33f  //[V] below value is heating off
 
 
 

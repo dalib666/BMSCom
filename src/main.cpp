@@ -29,11 +29,12 @@ void IRAM_ATTR hwTimerHandler()
 }
 void temp_control(void *);
 void checkNetConnection(void *);
+void hystReg(float in,float low_lev,float high_lev,int out_pin, bool & output);
 
 int Loop_runs_perSec;
 
 void setup() {
-  pinMode(BUILTIN_LED_PIN, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
   pinMode(GREEN_LED_PIN, OUTPUT);
   pinMode(RELE_HEATING_PIN, OUTPUT);
   pinMode(RELE_VENTILATION_PIN, OUTPUT);
@@ -41,7 +42,7 @@ void setup() {
   pinMode(RELE_RESERVE_PIN, OUTPUT);
   pinMode(WIFICONF_BUT_PIN, INPUT_PULLUP);
 
-  digitalWrite(BUILTIN_LED_PIN, LED_ACTIVELEV);  //On - indicate is starting
+  digitalWrite(RED_LED_PIN, LED_ACTIVELEV);  //On - indicate is starting
   digitalWrite(GREEN_LED_PIN, !LED_ACTIVELEV);  
   digitalWrite(RELE_HEATING_PIN, !RELE_ACTIVELEV);  
   digitalWrite(RELE_VENTILATION_PIN, !RELE_ACTIVELEV); 
@@ -74,7 +75,7 @@ void setup() {
 #ifdef DEBUG_MODE
  if(false){//suppress info from buttom, set standard connect to WIFI 
 #else
- if(!digitalRead(WIFICONF_BUT_PIN)){
+ if(digitalRead(WIFICONF_BUT_PIN)==WIFICONF_BUT_ACTLEV){
 #endif
   DEBUG_PART(Serial.println("startConfigPortal")); 
   //create config portal
@@ -101,7 +102,7 @@ void setup() {
   }
   Mqtt_init(); 
 
-  adk::set_interval(temp_control, 1000);           // function call
+  //adk::set_interval(temp_control, 1000);           // function call
   adk::set_interval(Mqtt_loopQ, 1000);           // function call
   adk::set_interval(Mqtt_loopS, 20000);           // function call
   adk::set_interval(checkNetConnection, 1000);    //  
@@ -167,11 +168,21 @@ void loop() {
 
 void temp_control(void *){
   static int ReleToSwitch=0;
-  static bool BuiltInLed=false;
-  //ESP.wdtFeed();
 
-  BuiltInLed=!BuiltInLed;    
-  digitalWrite(BUILTIN_LED_PIN, BuiltInLed);  
+  //ESP.wdtFeed();
+  LifeLed=!LifeLed;    
+  digitalWrite(GREEN_LED_PIN, LifeLed);  
+
+  if((TBMSComobj.m_data.t_max < 50) && (TBMSComobj.m_data.t_max > -20) && TBMSComobj.m_data.u_min > CELL_CRIT_VALUE && TBMSComobj.m_data.u_min < 5.0f){
+    hystReg(TBMSComobj.m_data.t_max,TEMP_REG_HTEMP-TEMP_REG_HYST/2,TEMP_REG_HTEMP+TEMP_REG_HYST/2,RELE_HEATING_PIN,Rele_heating);
+  }
+  else{
+    //invalid input data or other cond. not met
+    CritErrorLed=!CritErrorLed;    
+    digitalWrite(RED_LED_PIN, CritErrorLed);  
+    digitalWrite(RELE_HEATING_PIN, !RELE_ACTIVELEV);  
+  }
+
   //uint32_t actTime=0;
   
 }
@@ -224,3 +235,21 @@ void checkNetConnection(void *){
       digitalWrite(RELE_RESERVE_PIN, !RELE_ACTIVELEV); 
   }
   */
+void hystReg(float in,float low_lev,float high_lev,int out_pin, bool & output){
+    if(!output){
+      if(in < low_lev){
+        digitalWrite(out_pin, RELE_ACTIVELEV);  
+        output=true;
+      }
+    }
+    else{
+      if(in > high_lev){
+        digitalWrite(out_pin, !RELE_ACTIVELEV);  
+        output=false;
+      }
+    }
+}    
+
+
+
+ 

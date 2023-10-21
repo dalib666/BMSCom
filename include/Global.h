@@ -14,7 +14,7 @@
 #include "tbmscom.hpp"
 
 
-#define SW_VERSION  "V1.2.1"
+#define SW_VERSION  "V1.3.0"
 #define COMP_DATE __DATE__;
 #define COMP_TIME __TIME__;
 #define LOWLOOP_TIME  1000           //[ms]
@@ -29,22 +29,28 @@
 #define HWTIMER_PERIOD 2  //[ms] period of HW timer ISR
 #define START_TIME_OF_MQTT_MONITORING 60000ul //[ms]
 
-#define BUILTIN_LED_PIN     2   // internal LED, RED led
-#define GREEN_LED_PIN     2   // internal LED, GREEN led
+#define RED_LED_PIN           2     // internal LED, RED led
+#define GREEN_LED_PIN         16    // internal LED, GREEN led
 #define RELE_HEATING_PIN      14   
 #define RELE_VENTILATION_PIN  12
-#define RELE_MAIN_PIN         13  // main switcher - serial contact
-#define RELE_RESERVE_PIN      10  // reserve switcher - serial contact
+#define RELE_MAIN_PIN         13    // main switcher - serial contact
+#define RELE_RESERVE_PIN      9    // reserve switcher - serial contact
 
 #define LED_ACTIVELEV false
 #define RELE_ACTIVELEV false
 
-#define WIFICONF_BUT_PIN      9     // button for WIFI conf.
+#define WIFICONF_BUT_PIN      0     // button for WIFI conf.
+#define WIFICONF_BUT_ACTLEV   false
 /*#define STATUS_LED_PIN      12    // operational status LED
 #define WIFISTATUS_LED_PIN  16    // wifi status LED
 
 #define LED_ACTIVELEV false
 */
+#define TEMP_REG_HTEMP  15 // C
+#define TEMP_REG_HYST   2 // C
+#define CELL_CRIT_VALUE 3.33  //[V] below value is heating off
+
+
 
 extern int DebugCntr;
 extern long LoopCntr;
@@ -54,6 +60,11 @@ extern long ExLowLoopCntr;
 extern int DebugCntr;
 extern int PingErrCntr;
 extern int Loop_runs_perSec;
+extern bool LifeLed;
+extern bool CritErrorLed;
+
+extern bool Rele_heating;
+extern bool Rele_ventilating;
 
 #define BUFFER_LEN 64
 extern int RX_buffer_IND;
@@ -63,5 +74,10 @@ extern bool startMes;
 
 extern TBMSCom TBMSComobj; 
 extern ESP8266Timer ITimer;
+
+
+#define PIN_BUTTON 0
+#define PIN_BUTTON_ACTLEV false
+
 
 #endif //  GLOBAL_H

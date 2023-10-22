@@ -216,6 +216,7 @@ void handleDiagData() {
   message +="\n";  
   message +="Loop_runs_perSec = "; message +=Loop_runs_perSec; message +="\n";
   message +="DebugCntr = "; message +=DebugCntr; message +="\n";
+  message +="DebugCntr1 = "; message +=DebugCntr1; message +="\n";
   message +="LoopCntr = "; message +=LoopCntr; message +="\n";   
   message +="RunTime = "; message +=(float)millis()/1000.0f; message +="\n";     
  /* message +="LowLoopCntr = "; message +=LowLoopCntr; message +="\n"; 

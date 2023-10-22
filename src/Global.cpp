@@ -16,6 +16,7 @@ long LowLoopCntr=0;
 long HighLoopCntr=0;
 long ExLowLoopCntr=0;
 int DebugCntr=0;
+int DebugCntr1=0;
 bool LifeLed=false;
 bool CritErrorLed=false;
 bool Rele_heating=false;

@@ -171,6 +171,7 @@ void loop() {
 void temp_control(void *){
 
   //ESP.wdtFeed();
+   DebugCntr1++;
   LifeLed=!LifeLed;    
   digitalWrite(GREEN_LED_PIN, LifeLed);  
 

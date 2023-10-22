@@ -44,6 +44,7 @@ void Mqtt_init(){
 
 static bool PublisMqttdata=false;
 void Mqtt_loopQ(void *){
+  DebugCntr++;
   if(millis() > 20000ul || PublisMqttdata) {    // to wait some time for valid data from BMS
     PublisMqttdata=true;
     TBMSCom::Data bmsData;
@@ -82,7 +83,7 @@ bool MQTT_Check(){
   //  return true;
   unsigned long lastConTime=DevObj.connected();
   long deltaTime= millis() - lastConTime;
-  DebugCntr=(int)deltaTime;
+  //DebugCntr=(int)deltaTime;
   if((millis() < lastConTime) || (deltaTime < 10000l))
     return true;
   else

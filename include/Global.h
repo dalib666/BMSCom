@@ -53,6 +53,7 @@
 
 
 extern int DebugCntr;
+extern int DebugCntr1;
 extern long LoopCntr;
 extern long LowLoopCntr;
 extern long HighLoopCntr;

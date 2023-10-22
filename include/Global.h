@@ -34,7 +34,7 @@
 #define RELE_HEATING_PIN      14   
 #define RELE_VENTILATION_PIN  12
 #define RELE_MAIN_PIN         13    // main switcher - serial contact
-#define RELE_RESERVE_PIN      9    // reserve switcher - serial contact
+//#define RELE_RESERVE_PIN      9    // reserve switcher - do not use conflict with FLASH
 
 #define LED_ACTIVELEV false
 #define RELE_ACTIVELEV false

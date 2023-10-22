@@ -34,12 +34,15 @@ void hystReg(float in,float low_lev,float high_lev,int out_pin, bool & output);
 int Loop_runs_perSec;
 
 void setup() {
+  Serial.begin(CPUINTERFACE_SPEED);
+  DEBUG_PART(Serial.println("Starting..."));
+  delay(100);
   pinMode(RED_LED_PIN, OUTPUT);
   pinMode(GREEN_LED_PIN, OUTPUT);
   pinMode(RELE_HEATING_PIN, OUTPUT);
   pinMode(RELE_VENTILATION_PIN, OUTPUT);
   pinMode(RELE_MAIN_PIN, OUTPUT);
-  pinMode(RELE_RESERVE_PIN, OUTPUT);
+  //pinMode(RELE_RESERVE_PIN, OUTPUT);
   pinMode(WIFICONF_BUT_PIN, INPUT_PULLUP);
 
   digitalWrite(RED_LED_PIN, LED_ACTIVELEV);  //On - indicate is starting
@@ -47,12 +50,13 @@ void setup() {
   digitalWrite(RELE_HEATING_PIN, !RELE_ACTIVELEV);  
   digitalWrite(RELE_VENTILATION_PIN, !RELE_ACTIVELEV); 
   digitalWrite(RELE_MAIN_PIN, !RELE_ACTIVELEV);  
-  digitalWrite(RELE_RESERVE_PIN, !RELE_ACTIVELEV); 
+  //digitalWrite(RELE_RESERVE_PIN, !RELE_ACTIVELEV); 
 
   Serial.begin(CPUINTERFACE_SPEED);
   TBMSComobj.init(&Serial,CPUINTERFACE_SPEED);
 
-  DEBUG_PART(Serial.println("Starting..."));
+  DEBUG_PART(Serial.println("Part1 finished..."));
+  delay(100);
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
   DEBUG_PART(Serial.println("Waiting for possible pressing WIFI Configuration."));
   delay(3000);          

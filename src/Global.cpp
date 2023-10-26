@@ -21,6 +21,8 @@ bool LifeLed=false;
 bool CritErrorLed=false;
 bool Rele_heating=false;
 bool Rele_ventilating=false;
+int FT_TempControl=0;    // Function test of temp. regulation
+int FT_VentControl=0;    // Function test fo ventilation
 /*
 void abort_(){ //char * errmsg){
   //Serial.println(errmsg);

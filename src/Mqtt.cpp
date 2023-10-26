@@ -39,6 +39,10 @@ void Mqtt_init(){
     DevObj.registerSensorEntity("tbat",Hamqtt::PERTYPE_LOWSPEED,"temperature","°C",nullptr,TBMSCom::Data::MODUL_NR,true);      
     DevObj.registerSensorEntity("u_cellMax",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);     
     DevObj.registerSensorEntity("u_cellMin",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);   
+    
+    DevObj.registerSwitchEntity("Heat",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:heating-coil",nullptr);  
+    DevObj.registerSwitchEntity("Vent",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:hvac",nullptr);  
+
     //DEBUG_LOG0(true,"registerEntity");    
 }
 
@@ -70,6 +74,8 @@ void Mqtt_loopS(void *){
     DevObj.writeValue("ubat", bmsData.u_bat); 
     DevObj.writeValue("soc", (uint32_t)bmsData.soc); 
     DevObj.writeValue("warning", bmsData.warning); 
+    DevObj.writeSwitch("Heat", Rele_heating); 
+    DevObj.writeSwitch("Vent", Rele_ventilating); 
       //DevObj.publishValue("alert", bmsData.); 
       //DevObj.publishValue("Water_Temp", testVal); 
 

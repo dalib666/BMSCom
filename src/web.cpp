@@ -31,7 +31,7 @@ void handle_preupdate();
 void handle_log();
 void handleDiagData();
 void handle_reset();
-
+void handle_test_temp_control();
 /*
 void handleCmd();
 void handle_ext_info();
@@ -55,6 +55,8 @@ void web_init() {
     WebServer.on("/log",  handle_log);
     WebServer.on("/diag",  handleDiagData);  
     WebServer.on("/reset",  handle_reset);
+    WebServer.on("/tTCtrl", handle_test_temp_control);
+
     /*
     WebServer.on("/help", handle_help);
     WebServer.on("/cmd", handleCmd);
@@ -121,7 +123,8 @@ void handleRoot() {
   
 
   message +="\n";
-
+  addOneLine(message, "Rele_heating",Rele_heating, "");
+  addOneLine(message, "Rele_ventilating",Rele_ventilating, "");
   addOneLine(message, "u_min",TBMSComobj.m_data.u_min, "V");
   addOneLine(message, "u_max", TBMSComobj.m_data.u_max, "V");
   addOneLine(message, "i_max",TBMSComobj.m_data.i_max, "A");
@@ -132,7 +135,8 @@ void handleRoot() {
   addOneLine(message, "t_max",TBMSComobj.m_data.t_max, "C");
   addOneLine(message, "cell_nr",TBMSComobj.m_data.cell_nr);
   addOneLine(message, "u_cellMax",TBMSComobj.m_data.u_cellMax);
-  addOneLine(message, "u_cellMin",TBMSComobj.m_data.u_cellMin);  
+  addOneLine(message, "u_cellMin",TBMSComobj.m_data.u_cellMin); 
+  addOneLine(message, "t_cellMin",TBMSComobj.m_data.t_cellMin);  
   addOneLine(message, "ah",TBMSComobj.m_data.ah);
 
   for(int ind=0; ind < TBMSCom::Data::MODUL_NR; ind++ ){
@@ -233,6 +237,23 @@ void handle_reset(){
   WebServer.send(200, "text/plain", message);  
   delay(1000); // to give time to send responce
   ESP.restart();
+}
+
+void handle_test_temp_control(){
+ 
+  String argStr=WebServer.arg("on");
+  String message = "Temp reg. test is:"; 
+
+  if(argStr.length()>0){
+    int state_i = argStr.toInt();
+    FT_TempControl=state_i;
+    message+= (state_i)? "on":"off";
+  }
+  else
+    message+= " error in input";
+
+
+  WebServer.send(200, "text/plain", message);
 }
 
 /*

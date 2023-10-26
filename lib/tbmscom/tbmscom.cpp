@@ -108,6 +108,7 @@ void TBMSCom::main(){
                                 break;
                             indBuf+=4;
                         }    
+                        find_t_cellMin();
                         m_data.frameRxCntr[frameNumber]++;
                         m_data.frameRxTime[frameNumber]=millis();
                      break;
@@ -187,6 +188,7 @@ void TBMSCom::main(){
                                 break;                               
                             indBuf+=4;
                         }    
+                        find_t_cellMin();
                         m_data.frameRxCntr[frameNumber]++;
                         m_data.frameRxTime[frameNumber]=millis();
                     break;
@@ -299,6 +301,7 @@ void TBMSCom::initData(int frameNumber){
             for(int ind=4;ind<8;ind++){
                 m_data.t[ind]=NODATA_FL;
             }    
+            m_data.t_cellMin=NODATA_FL;
             break;   
 
         case 8:
@@ -343,6 +346,21 @@ void TBMSCom::find_u_cellMax(){
             max=m_data.u_cell[ind];
     }    
     m_data.u_cellMax=max;
+}
+
+void TBMSCom::find_t_cellMin(){
+    float min=100;
+    if(m_data.cell_nr > Data::U_CELL_NR)
+        return;
+
+    for(int ind=0;ind < TBMSCom::Data::MODUL_NR;ind++){
+        if(m_data.t[ind] != 0.00f){
+            if(min > m_data.t[ind])
+                min=m_data.t[ind];
+        
+        }
+    }    
+    m_data.t_cellMin=min;
 }
 
 void TBMSCom::find_u_cellMin(){

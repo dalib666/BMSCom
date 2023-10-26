@@ -31,9 +31,9 @@
 
 #define RED_LED_PIN           2     // internal LED, RED led
 #define GREEN_LED_PIN         16    // internal LED, GREEN led
-#define RELE_HEATING_PIN      14   
+#define RELE_HEATING_PIN      13   
 #define RELE_VENTILATION_PIN  12
-#define RELE_MAIN_PIN         13    // main switcher - serial contact
+#define RELE_MAIN_PIN         14    // main switcher - serial contact
 //#define RELE_RESERVE_PIN      9    // reserve switcher - do not use conflict with FLASH
 
 #define LED_ACTIVELEV false
@@ -66,6 +66,8 @@ extern bool CritErrorLed;
 
 extern bool Rele_heating;
 extern bool Rele_ventilating;
+extern int FT_TempControl;   
+extern int FT_VentControl;  
 
 #define BUFFER_LEN 64
 extern int RX_buffer_IND;

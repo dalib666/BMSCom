@@ -179,22 +179,53 @@ void temp_control(void *){
   LifeLed=!LifeLed;    
   digitalWrite(GREEN_LED_PIN, LifeLed);  
 
+  float actTemp=(FT_TempControl!=0)? FT_TempControl:TBMSComobj.m_data.t_cellMin;
 
-  if((TBMSComobj.m_data.t_max < 50) && (TBMSComobj.m_data.t_max > -20) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
+  if((TBMSComobj.m_data.t_cellMin < 40.0f) && (TBMSComobj.m_data.t_cellMin > -20.0f) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
      DEBUG_PART(Serial.println("Regulation is runing"));
-    hystReg(TBMSComobj.m_data.t_max,TEMP_REG_HTEMP-TEMP_REG_HYST/2.0f,TEMP_REG_HTEMP+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
+    hystReg(actTemp,TEMP_REG_HTEMP-TEMP_REG_HYST/2.0f,TEMP_REG_HTEMP+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
+    CritErrorLed=false;  
   }
   else{
     DEBUG_PART(Serial.println("Regulation is off"));
     //invalid input data or other cond. not met
-    CritErrorLed=!CritErrorLed;    
-    digitalWrite(RED_LED_PIN, CritErrorLed);  
+    CritErrorLed=true;    
     digitalWrite(RELE_HEATING_PIN, !RELE_ACTIVELEV);  
   }
 
+  if(CritErrorLed)    
+    digitalWrite(RED_LED_PIN, CritErrorLed);  
   //uint32_t actTime=0;
   
 }
+
+void vent_control(void *){
+
+  //ESP.wdtFeed();
+   DebugCntr1++;
+  LifeLed=!LifeLed;    
+  digitalWrite(GREEN_LED_PIN, LifeLed);  
+
+  float actTemp=(FT_TempControl!=0)? FT_TempControl:TBMSComobj.m_data.t_cellMin;
+
+  if((TBMSComobj.m_data.t_cellMin < 40.0f) && (TBMSComobj.m_data.t_cellMin > -20.0f) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
+     DEBUG_PART(Serial.println("Regulation is runing"));
+    hystReg(actTemp,TEMP_REG_HTEMP-TEMP_REG_HYST/2.0f,TEMP_REG_HTEMP+TEMP_REG_HYST/2.0f,RELE_VENTILATION_PIN,Rele_heating);
+    CritErrorLed=false;  
+  }
+  else{
+    DEBUG_PART(Serial.println("Regulation is off"));
+    //invalid input data or other cond. not met
+    CritErrorLed=true;    
+    digitalWrite(RELE_VENTILATION_PIN, RELE_ACTIVELEV);  
+  }
+
+  if(CritErrorLed)    
+    digitalWrite(RED_LED_PIN, CritErrorLed);  
+  //uint32_t actTime=0;
+  
+}
+
 
 void checkNetConnection(void *){
 /*

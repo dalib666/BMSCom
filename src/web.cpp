@@ -32,6 +32,8 @@ void handle_log();
 void handleDiagData();
 void handle_reset();
 void handle_test_temp_control();
+void handle_test_vent_control();
+
 /*
 void handleCmd();
 void handle_ext_info();
@@ -56,6 +58,7 @@ void web_init() {
     WebServer.on("/diag",  handleDiagData);  
     WebServer.on("/reset",  handle_reset);
     WebServer.on("/tTCtrl", handle_test_temp_control);
+    WebServer.on("/tVCtrl", handle_test_vent_control);
 
     /*
     WebServer.on("/help", handle_help);
@@ -247,6 +250,23 @@ void handle_test_temp_control(){
   if(argStr.length()>0){
     int state_i = argStr.toInt();
     FT_TempControl=state_i;
+    message+= (state_i)? "on":"off";
+  }
+  else
+    message+= " error in input";
+
+
+  WebServer.send(200, "text/plain", message);
+}
+
+void handle_test_vent_control(){
+ 
+  String argStr=WebServer.arg("on");
+  String message = "Ventilation reg. test is:"; 
+
+  if(argStr.length()>0){
+    int state_i = argStr.toInt();
+    FT_VentControl=state_i;
     message+= (state_i)? "on":"off";
   }
   else

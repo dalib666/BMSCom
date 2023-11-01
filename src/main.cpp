@@ -14,6 +14,7 @@
 #include "web.h"
 #include "Global.h"
 #include "Mqtt.hpp"
+#include "GlStatus.h"  
 
 TBMSCom TBMSComobj;  
 Pinger Pinger_;
@@ -28,8 +29,9 @@ void IRAM_ATTR hwTimerHandler()
   TBMSComobj.period();
 }
 void temp_control(void *);
+void vent_control(void *);
 void checkNetConnection(void *);
-void hystReg(float in,float low_lev,float high_lev,int out_pin, bool & output);
+void hystReg(bool heatMode,float in,float low_lev,float high_lev,int out_pin, bool & output);
 
 int Loop_runs_perSec;
 
@@ -109,6 +111,7 @@ void setup() {
   Mqtt_init(); 
 
   adk::set_interval(temp_control, 1000);           // function call
+  adk::set_interval(vent_control, 1000);           // function call
   adk::set_interval(Mqtt_loopQ, 1000);           // function call
   adk::set_interval(Mqtt_loopS, 20000);           // function call
   adk::set_interval(checkNetConnection, 1000);    //  
@@ -175,54 +178,48 @@ void loop() {
 void temp_control(void *){
 
   //ESP.wdtFeed();
-   DebugCntr1++;
-  LifeLed=!LifeLed;    
-  digitalWrite(GREEN_LED_PIN, LifeLed);  
 
   float actTemp=(FT_TempControl!=0)? FT_TempControl:TBMSComobj.m_data.t_cellMin;
 
-  if((TBMSComobj.m_data.t_cellMin < 40.0f) && (TBMSComobj.m_data.t_cellMin > -20.0f) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
+  if((actTemp < 40.0f) && (actTemp > -20.0f) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
      DEBUG_PART(Serial.println("Regulation is runing"));
-    hystReg(actTemp,TEMP_REG_HTEMP-TEMP_REG_HYST/2.0f,TEMP_REG_HTEMP+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
-    CritErrorLed=false;  
+    hystReg(true,actTemp,TEMP_REG_HTEMP-TEMP_REG_HYST/2.0f,TEMP_REG_HTEMP+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
+    Status.gerror.bits.hRegDeact=false;
   }
   else{
     DEBUG_PART(Serial.println("Regulation is off"));
     //invalid input data or other cond. not met
-    CritErrorLed=true;    
+    Status.gerror.bits.hRegDeact=false;  
+    Rele_heating=false;
     digitalWrite(RELE_HEATING_PIN, !RELE_ACTIVELEV);  
   }
 
-  if(CritErrorLed)    
-    digitalWrite(RED_LED_PIN, CritErrorLed);  
-  //uint32_t actTime=0;
-  
+ 
 }
 
 void vent_control(void *){
 
-  //ESP.wdtFeed();
-   DebugCntr1++;
-  LifeLed=!LifeLed;    
-  digitalWrite(GREEN_LED_PIN, LifeLed);  
 
-  float actTemp=(FT_TempControl!=0)? FT_TempControl:TBMSComobj.m_data.t_cellMin;
+  float actTemp=(FT_VentControl!=0)? FT_VentControl:TBMSComobj.m_data.t_cellMin;
 
-  if((TBMSComobj.m_data.t_cellMin < 40.0f) && (TBMSComobj.m_data.t_cellMin > -20.0f) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
-     DEBUG_PART(Serial.println("Regulation is runing"));
-    hystReg(actTemp,TEMP_REG_HTEMP-TEMP_REG_HYST/2.0f,TEMP_REG_HTEMP+TEMP_REG_HYST/2.0f,RELE_VENTILATION_PIN,Rele_heating);
-    CritErrorLed=false;  
+
+  if((actTemp < 40.0f) && (actTemp > -20.0f)){
+
+     DEBUG_PART(Serial.println("Vent regulation is runing"));
+    if(actTemp < ((VTEMP_REG_HTEMP+VTEMP_REG_CTEMP)/2))
+      hystReg(true,actTemp,VTEMP_REG_HTEMP-VTEMP_REG_HYST/2.0f,VTEMP_REG_HTEMP+VTEMP_REG_HYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
+    else
+      hystReg(false,actTemp,VTEMP_REG_CTEMP-VTEMP_REG_CHYST/2.0f,VTEMP_REG_CTEMP+VTEMP_REG_CHYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
+    
+    Status.gwarning.bits.vRegDeact=false;
   }
   else{
-    DEBUG_PART(Serial.println("Regulation is off"));
+    DEBUG_PART(Serial.println("Regulation is off - ventilation is on all the time."));
     //invalid input data or other cond. not met
-    CritErrorLed=true;    
+    Status.gwarning.bits.vRegDeact=true;
+    Rele_ventilating=true;
     digitalWrite(RELE_VENTILATION_PIN, RELE_ACTIVELEV);  
   }
-
-  if(CritErrorLed)    
-    digitalWrite(RED_LED_PIN, CritErrorLed);  
-  //uint32_t actTime=0;
   
 }
 
@@ -275,20 +272,25 @@ void checkNetConnection(void *){
       digitalWrite(RELE_RESERVE_PIN, !RELE_ACTIVELEV); 
   }
   */
-void hystReg(float in,float low_lev,float high_lev,int out_pin, bool & output){
+void hystReg(bool heatMode,float in,float low_lev,float high_lev,int out_pin, bool & output){
     if(!output){
-      if(in < low_lev){
+      if((heatMode && in < low_lev) || (!heatMode && in > high_lev)){
         digitalWrite(out_pin, RELE_ACTIVELEV);  
         output=true;
       }
     }
     else{
-      if(in > high_lev){
+      if((heatMode && in > high_lev) || (!heatMode && in < low_lev)){
         digitalWrite(out_pin, !RELE_ACTIVELEV);  
         output=false;
       }
     }
-}    
+}
+
+  
+
+
+    
 
 
 

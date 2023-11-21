@@ -11,18 +11,26 @@ char MqttPass[] = "ol3uuNeek6ke7eich8aiva7ZoxoiVei1aiteith0aighae0ieP7pahFaNgeiP
 #define MODEL "BatCC01"
 #define EXPIRATION_TIME 3    //[sec] multiplier of parameter "perType" to compute expirtion time  in HA after lost data
 //topics - published
-
+char ConfURL[]="http://192.168.1.111";
 
 
 // Initialize the client library
 WiFiClient Wclient;
-Hamqtt DevObj("BMS", nullptr,Hamqtt::PERTYPE_LOWSPEED,"BMS01","DK",SW_VERSION,"001",nullptr,HW_VERSION,nullptr,EXPIRATION_TIME);
+Hamqtt DevObj("BMS", nullptr,Hamqtt::PERTYPE_LOWSPEED,"BMS01","DK",SW_VERSION,"001",ConfURL,HW_VERSION,nullptr,EXPIRATION_TIME); //
 
 void entCallBack(int indOfEnt, String &payload){
-  /*DEBUG_LOG(true,"entCallBack:indOfEnt= ",indOfEnt);
-  DEBUG_LOG_NOF(true,"payload= ",payload.c_str());
-  DevObj.publishValue("Req_Power", payload.toFloat()); */
+  //DEBUG_LOG(true,"entCallBack:indOfEnt= ",indOfEnt);
+  DEBUG_LOG(true,"entCallBack:payload= ",payload.c_str());
+  static String value_stat;
+  const char * entName=DevObj.getEntName(indOfEnt);
+  if(strcmp(entName,"Restart")==0){
+    ESP.restart();
+  } 
+    
+   // DevObj.publishSwitch("State", Relay,false); 
+    
 }
+
 
 
 void Mqtt_init(){
@@ -42,6 +50,8 @@ void Mqtt_init(){
     
     DevObj.registerSwitchEntity("Heat",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:heating-coil",nullptr);  
     DevObj.registerSwitchEntity("Vent",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:hvac",nullptr);  
+
+    DevObj.registerButtonEntity("Restart","restart",entCallBack,nullptr); 
 
     //DEBUG_LOG0(true,"registerEntity");    
 }

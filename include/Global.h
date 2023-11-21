@@ -14,12 +14,13 @@
 #include "tbmscom.hpp"
 
 
-#define SW_VERSION  "V1.3.0"
+#define SW_VERSION  "V1.4.0"
 #define COMP_DATE __DATE__;
 #define COMP_TIME __TIME__;
 #define LOWLOOP_TIME  1000           //[ms]
 #define HIGHLOOP_TIME 200           //[ms]
 #define EXLOWLOOP_TIME  60000ul  //60000ul     //[ms]
+#define STATUSLOOP_TIME 100       //[ms]
 #ifdef DEBUG_MODE
   #define DEBUG_PART(cs) cs
 #else

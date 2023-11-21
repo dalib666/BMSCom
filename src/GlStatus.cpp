@@ -16,7 +16,7 @@
 
 
 
-GLStatusDef Status(HIGHLOOP_TIME);
+GLStatusDef Status(STATUSLOOP_TIME);
 
 
 

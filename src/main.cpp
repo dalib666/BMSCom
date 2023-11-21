@@ -28,6 +28,7 @@ void IRAM_ATTR hwTimerHandler()
 {
   TBMSComobj.period();
 }
+void statusLoop(void *);
 void temp_control(void *);
 void vent_control(void *);
 void checkNetConnection(void *);
@@ -115,7 +116,7 @@ void setup() {
   adk::set_interval(Mqtt_loopQ, 1000);           // function call
   adk::set_interval(Mqtt_loopS, 20000);           // function call
   adk::set_interval(checkNetConnection, 1000);    //  
-
+  adk::set_interval(statusLoop, STATUSLOOP_TIME); 
 
   while(Serial.available()) {Serial.read();} // clear any chaos before 
   
@@ -175,7 +176,7 @@ void loop() {
 
 }
 
-void temp_control(void *){
+void temp_control(void *){  
 
   //ESP.wdtFeed();
 
@@ -221,6 +222,10 @@ void vent_control(void *){
     digitalWrite(RELE_VENTILATION_PIN, RELE_ACTIVELEV);  
   }
   
+}
+
+void statusLoop(void *){
+  Status.refresh();
 }
 
 

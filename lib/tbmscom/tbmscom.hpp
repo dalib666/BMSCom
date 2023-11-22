@@ -32,7 +32,7 @@ class TBMSCom{
      Convert from 2 bytes to float, check against the ranges,rescale by scale coef.
     @return status - true/false - refreshed by new valid value/erro value, no refresh was done
     */
-    bool  b_to_w_be_check(int framenumber,float & dataItem,uint8_t *buf,int ind,float scale,float rangeL,float rangeH);
+    bool  b_to_w_be_check(int framenumber,float & dataItem,uint8_t *buf,int ind,float scale,float rangeL,float rangeH,float checkdif=0);
     bool  b_to_w_be_check(int framenumber,uint16_t & dataItem,uint8_t *buf,int ind,uint16_t rangeL,uint16_t rangeH);
     /**
      * init frame data

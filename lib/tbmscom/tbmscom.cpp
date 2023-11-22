@@ -18,12 +18,13 @@
 extern int DebugCntr;
 
 
-bool  TBMSCom::b_to_w_be_check(int framenumber,float & dataItem,uint8_t *buf,int ind,float scale,float rangeL,float rangeH){
+bool  TBMSCom::b_to_w_be_check(int framenumber,float & dataItem,uint8_t *buf,int ind,float scale,float rangeL,float rangeH, float checkdif){
     bool status = false;
     float value= scale * (float) (buf[ind]<<8 | buf[ind+1]);
     if((value >= rangeL)&&(value <= rangeH)){
         status=true;
-        dataItem=value;
+        if(checkdif==0 || abs(dataItem-value) < checkdif || dataItem==NODATA_FL)
+            dataItem=value;
     }
     else
       m_data.frameErCntr[framenumber]++;
@@ -104,7 +105,7 @@ void TBMSCom::main(){
                         indBuf=2;
                         for(int ind=4;ind<8;ind++){
                             //m_data.t[ind]=b_to_w_be(rxBuff,indBuf) * 0.1;
-                            if(!b_to_w_be_check(frameNumber,m_data.t[ind],rxBuff,indBuf,0.1f,0.0f,40.0f))
+                            if(!b_to_w_be_check(frameNumber,m_data.t[ind],rxBuff,indBuf,0.1f,0.0f,40.0f,0.5f))
                                 break;
                             indBuf+=4;
                         }    
@@ -184,7 +185,7 @@ void TBMSCom::main(){
                         indBuf=2;
                         for(int ind=0;ind<4;ind++){
                             //m_data.t[ind]=b_to_w_be(rxBuff,indBuf) * 0.1;    
-                            if(!b_to_w_be_check(frameNumber,m_data.t[ind],rxBuff,indBuf,0.1f,1.0f,40.0f))
+                            if(!b_to_w_be_check(frameNumber,m_data.t[ind],rxBuff,indBuf,0.1f,1.0f,40.0f,0.5f))
                                 break;                               
                             indBuf+=4;
                         }    

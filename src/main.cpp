@@ -203,10 +203,14 @@ void vent_control(void *){
 
   float actTemp=(FT_VentControl!=0)? FT_VentControl:TBMSComobj.m_data.t_cellMin;
 
+  if(Rele_heating){
+    digitalWrite(RELE_VENTILATION_PIN, !RELE_ACTIVELEV);    
+    return;     // if heating is on - always disable venting
+  }
 
   if((actTemp < 40.0f) && (actTemp > -20.0f)){
 
-     DEBUG_PART(Serial.println("Vent regulation is runing"));
+    DEBUG_PART(Serial.println("Vent regulation is runing"));
     if(actTemp < ((VTEMP_REG_HTEMP+VTEMP_REG_CTEMP)/2))
       hystReg(true,actTemp,VTEMP_REG_HTEMP-VTEMP_REG_HYST/2.0f,VTEMP_REG_HTEMP+VTEMP_REG_HYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
     else

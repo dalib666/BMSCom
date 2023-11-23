@@ -10,6 +10,7 @@
 #include "web.h"
 #include "Global.h"
 #include "tbmscom.hpp"
+#include "GlStatus.h" 
 //#include "Params.h" 
 #include <ESP8266HTTPUpdateServer.h>
 #include "Global.h"
@@ -126,6 +127,9 @@ void handleRoot() {
   
 
   message +="\n";
+  addOneLine(message, "GlStatus",Status.mStatus, "");
+  addOneLine(message, "GlError",Status.getErrorStr(), "");
+  addOneLine(message, "GlWarning",Status.getWarningStr(), "");
   addOneLine(message, "Rele_heating",Rele_heating, "");
   addOneLine(message, "Rele_ventilating",Rele_ventilating, "");
   addOneLine(message, "u_min",TBMSComobj.m_data.u_min, "V");

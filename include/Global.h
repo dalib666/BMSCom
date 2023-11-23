@@ -47,9 +47,9 @@
 
 #define LED_ACTIVELEV false
 */
-#define TEMP_REG_HTEMP  15.0f // C
+#define TEMP_REG_HTEMP  14.0f // C
 #define TEMP_REG_HYST   2.0f // C
-#define VTEMP_REG_HTEMP  17.0f // C - requested heating temperature
+#define VTEMP_REG_HTEMP  16.0f // C - requested heating temperature
 #define VTEMP_REG_HYST   1.0f // C  - hysterezy 
 #define VTEMP_REG_CTEMP  26.0f // C - requested cooling temperature
 #define VTEMP_REG_CHYST   1.0f // C - hysterezy

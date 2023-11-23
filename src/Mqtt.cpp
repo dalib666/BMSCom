@@ -3,6 +3,7 @@
 #include "hamqtt.hpp"
 #include "Global.h" 
 #include "DebugFnc.h"  
+#include "GlStatus.h" 
 
 IPAddress BrokerIP(192,168,1,109);     
 char MqttUserName[] = "homeassistant"; 
@@ -35,6 +36,9 @@ void entCallBack(int indOfEnt, String &payload){
 
 void Mqtt_init(){
     
+    String confURL="http://";
+    confURL+=WiFi.localIP().toString();
+    DevObj.setDynamic(confURL.c_str());
     Hamqtt::init(&Wclient, BrokerIP,MqttUserName,MqttPass,MODEL);
     DEBUG_LOG0(true,"Mqtt init");
     //DevObj.registerEntity("sensor","Water_Temp",Hamqtt::PERTYPE_NORMAL,"temperature","°C",nullptr,"{{value_json.wTemp}}","mdi:thermometer");
@@ -47,7 +51,8 @@ void Mqtt_init(){
     DevObj.registerSensorEntity("tbat",Hamqtt::PERTYPE_LOWSPEED,"temperature","°C",nullptr,TBMSCom::Data::MODUL_NR,true);      
     DevObj.registerSensorEntity("u_cellMax",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);     
     DevObj.registerSensorEntity("u_cellMin",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);   
-    
+    DevObj.registerSensorEntity("gl_status",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1,true);   
+
     DevObj.registerSwitchEntity("Heat",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:heating-coil",nullptr);  
     DevObj.registerSwitchEntity("Vent",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:hvac",nullptr);  
 
@@ -85,7 +90,9 @@ void Mqtt_loopS(void *){
     DevObj.writeValue("soc", (uint32_t)bmsData.soc); 
     DevObj.writeValue("warning", bmsData.warning); 
     DevObj.writeSwitch("Heat", Rele_heating); 
-    DevObj.writeSwitch("Vent", Rele_ventilating); 
+    DevObj.writeSwitch("Vent", Rele_ventilating);
+    DevObj.writeValue("gl_status", (uint32_t)Status.mStatus);  
+   
       //DevObj.publishValue("alert", bmsData.); 
       //DevObj.publishValue("Water_Temp", testVal); 
 

@@ -16,7 +16,7 @@
 
 #include "DebugFnc.h"   // must be after definition of DEBUG_MODE macro 
 
-
+#pragma once
 
 class GLStatusDef{
   public:
@@ -87,11 +87,13 @@ class GLStatusDef{
       return "Heating regulation is deactivated - heating is switched-off !";
     if(gerror.bits.wifi_com)
       return "Not connected into WIFI";
+    return "";
   }
 
   const char * getWarningStr(){
     if(gwarning.bits.vRegDeact)
       return "Ventilation regulation deactivated - ventilation is switched-on permanently !";  
+    return "";  
   }
   /*
   void setSafe(){mStatus=STATUS_SAFE_STATE;}

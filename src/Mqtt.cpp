@@ -52,6 +52,7 @@ void Mqtt_init(){
     DevObj.registerSensorEntity("u_cellMax",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);     
     DevObj.registerSensorEntity("u_cellMin",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);   
     DevObj.registerSensorEntity("gl_status",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1,true);   
+//    DevObj.registerBinSensorEntity("discharged",Hamqtt::PERTYPE_LOWSPEED,"battery","mdi:battery-alert-variant-outline");   
 
     DevObj.registerSwitchEntity("Heat",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:heating-coil",nullptr);  
     DevObj.registerSwitchEntity("Vent",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:hvac",nullptr);  
@@ -72,6 +73,7 @@ void Mqtt_loopQ(void *){
 
     DevObj.publishValue("ibat", bmsData.i_bat); 
     DevObj.publishValue("state", (uint32_t)bmsData.state);   
+//  DevObj.publishBinSen("discharged",TBD); 
   }    
 }
 

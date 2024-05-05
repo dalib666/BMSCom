@@ -201,7 +201,7 @@ void temp_control(void *){
 void vent_control(void *){
 
 
-  float actTemp=(FT_VentControl!=0)? FT_VentControl:TBMSComobj.m_data.t_cellMin;
+  float actTemp=(FT_VentControl!=0)? FT_VentControl:TBMSComobj.m_data.t[0];   //TODO provisory to be possible cool by ventilating
 
   if(Rele_heating){
     digitalWrite(RELE_VENTILATION_PIN, !RELE_ACTIVELEV);    

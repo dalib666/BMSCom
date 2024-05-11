@@ -43,7 +43,7 @@ class TBMSCom{
     void find_u_cellMax();
     void find_u_cellMin();
     void find_t_cellMin();
-
+    void find_t_cellMax();
     /**
      * init all data  */
     void initAllData();
@@ -85,7 +85,8 @@ class TBMSCom{
 
         // frame 2,10    
         float t[MODUL_NR];      // [°C] temperature of module 1(0.1)
-        float t_cellMin;        //[°C] minimum temperature of cells 
+        float t_cellMin;        // [°C] minimum temperature of cells 
+        float t_cellMax;        // [°C] maximum temperature of cells   
         // frame  3...8, 11, 12,13, 14, 15, 16-part
         float u_cell[U_CELL_NR]; //[V] cells voltage (0.001) 
         float u_cellMax; //[V] actual most maximum cell voltage (0.001) 

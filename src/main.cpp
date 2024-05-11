@@ -15,6 +15,8 @@
 #include "Global.h"
 #include "Mqtt.hpp"
 #include "GlStatus.h"  
+#include "HFunc.hpp"  
+#include "BatHVAC.hpp"
 
 TBMSCom TBMSComobj;  
 Pinger Pinger_;
@@ -111,8 +113,7 @@ void setup() {
   }
   Mqtt_init(); 
 
-  adk::set_interval(temp_control, 1000);           // function call
-  adk::set_interval(vent_control, 1000);           // function call
+  adk::set_interval(BatHVAC::process, 1000);           // function call
   adk::set_interval(Mqtt_loopQ, 1000);           // function call
   adk::set_interval(Mqtt_loopS, 20000);           // function call
   adk::set_interval(checkNetConnection, 1000);    //  
@@ -176,58 +177,6 @@ void loop() {
 
 }
 
-void temp_control(void *){  
-
-  //ESP.wdtFeed();
-
-  float actTemp=(FT_TempControl!=0)? FT_TempControl:TBMSComobj.m_data.t_cellMin;
-
-  if((actTemp < 40.0f) && (actTemp > -20.0f) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
-     DEBUG_PART(Serial.println("Regulation is runing"));
-    hystReg(true,actTemp,TEMP_REG_HTEMP-TEMP_REG_HYST/2.0f,TEMP_REG_HTEMP+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
-    Status.gerror.bits.hRegDeact=false;
-  }
-  else{
-    DEBUG_PART(Serial.println("Regulation is off"));
-    //invalid input data or other cond. not met
-    Status.gerror.bits.hRegDeact=false;  
-    Rele_heating=false;
-    digitalWrite(RELE_HEATING_PIN, !RELE_ACTIVELEV);  
-  }
-
- 
-}
-
-void vent_control(void *){
-
-
-  float actTemp=(FT_VentControl!=0)? FT_VentControl:TBMSComobj.m_data.t[0];   //TODO provisory to be possible cool by ventilating
-
-  if(Rele_heating){
-    digitalWrite(RELE_VENTILATION_PIN, !RELE_ACTIVELEV);    
-    return;     // if heating is on - always disable venting
-  }
-
-  if((actTemp < 40.0f) && (actTemp > -20.0f)){
-
-    DEBUG_PART(Serial.println("Vent regulation is runing"));
-    if(actTemp < ((VTEMP_REG_HTEMP+VTEMP_REG_CTEMP)/2))
-      hystReg(true,actTemp,VTEMP_REG_HTEMP-VTEMP_REG_HYST/2.0f,VTEMP_REG_HTEMP+VTEMP_REG_HYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
-    else
-      hystReg(false,actTemp,VTEMP_REG_CTEMP-VTEMP_REG_CHYST/2.0f,VTEMP_REG_CTEMP+VTEMP_REG_CHYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
-    
-    Status.gwarning.bits.vRegDeact=false;
-  }
-  else{
-    DEBUG_PART(Serial.println("Regulation is off - ventilation is on all the time."));
-    //invalid input data or other cond. not met
-    Status.gwarning.bits.vRegDeact=true;
-    Rele_ventilating=true;
-    digitalWrite(RELE_VENTILATION_PIN, RELE_ACTIVELEV);  
-  }
-  
-}
-
 void statusLoop(void *){
   Status.refresh();
 }
@@ -248,53 +197,8 @@ void checkNetConnection(void *){
 
 }
 
-/* Test Relay
- BuiltInLed=!BuiltInLed;    
-  digitalWrite(BUILTIN_LED_PIN, BuiltInLed);  
 
-  switch(ReleToSwitch){
-    case 0:
-      ReleToSwitch++;
-      digitalWrite(RELE_HEATING_PIN, RELE_ACTIVELEV);  
-    break;  
-  
-    case 1:
-      ReleToSwitch++;
-      digitalWrite(RELE_VENTILATION_PIN, RELE_ACTIVELEV);
-    break;  
 
-    case 2:
-      ReleToSwitch++;
-      digitalWrite(RELE_MAIN_PIN, RELE_ACTIVELEV);  
-    break; 
-
-    case 3:
-      ReleToSwitch++;
-      digitalWrite(RELE_RESERVE_PIN, RELE_ACTIVELEV); 
-    break; 
-
-    case 4:
-      ReleToSwitch=0;
-      digitalWrite(RELE_HEATING_PIN, !RELE_ACTIVELEV);  
-      digitalWrite(RELE_VENTILATION_PIN, !RELE_ACTIVELEV); 
-      digitalWrite(RELE_MAIN_PIN, !RELE_ACTIVELEV);  
-      digitalWrite(RELE_RESERVE_PIN, !RELE_ACTIVELEV); 
-  }
-  */
-void hystReg(bool heatMode,float in,float low_lev,float high_lev,int out_pin, bool & output){
-    if(!output){
-      if((heatMode && in < low_lev) || (!heatMode && in > high_lev)){
-        digitalWrite(out_pin, RELE_ACTIVELEV);  
-        output=true;
-      }
-    }
-    else{
-      if((heatMode && in > high_lev) || (!heatMode && in < low_lev)){
-        digitalWrite(out_pin, !RELE_ACTIVELEV);  
-        output=false;
-      }
-    }
-}
 
   
 

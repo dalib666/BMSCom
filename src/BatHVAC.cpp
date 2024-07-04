@@ -3,6 +3,7 @@
 #include "GlStatus.h" 
 #include "BatHVAC.hpp"
 #include "HFunc.hpp"  
+#include "Params.h"
 #include "DebugFnc.h"
 
 namespace BatHVAC{
@@ -30,7 +31,7 @@ namespace BatHVAC{
 
         if(isTempValid(actTemp) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
             DEBUG_PART(Serial.println("Regulation is runing"));
-            hystReg(true,actTemp,TEMP_REG_HTEMP-TEMP_REG_HYST/2.0f,TEMP_REG_HTEMP+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
+            hystReg(true,actTemp,Params.Heat_ReqTemp-TEMP_REG_HYST/2.0f,Params.Heat_ReqTemp+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
             Status.gerror.bits.hRegDeact=false;
         }
         else{
@@ -58,7 +59,7 @@ namespace BatHVAC{
             DEBUG_PART(Serial.println("Vent regulation is runing"));
             // ventilation is used only for cooling
             //hystReg(true,actMinTemp,VTEMP_REG_HTEMP-VTEMP_REG_HYST/2.0f,VTEMP_REG_HTEMP+VTEMP_REG_HYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
-            hystReg(false,actMaxTemp,VTEMP_REG_CTEMP-VTEMP_REG_CHYST/2.0f,VTEMP_REG_CTEMP+VTEMP_REG_CHYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
+            hystReg(false,actMaxTemp,Params.Cool_ReqTemp-VTEMP_REG_CHYST/2.0f,Params.Cool_ReqTemp+VTEMP_REG_CHYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
             
             Status.gwarning.bits.vRegDeact=false;
         }

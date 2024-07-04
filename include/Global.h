@@ -14,7 +14,7 @@
 #include "tbmscom.hpp"
 
 
-#define SW_VERSION  "V1.4.3"
+#define SW_VERSION  "V1.5.0"
 #define COMP_DATE __DATE__;
 #define COMP_TIME __TIME__;
 #define LOWLOOP_TIME  1000           //[ms]
@@ -49,8 +49,8 @@
 */
 #define TEMP_REG_HTEMP  13.0f // C 
 #define TEMP_REG_HYST   2.0f // C
-#define VTEMP_REG_HTEMP  18.0f // C - requested heating temperature
-#define VTEMP_REG_HYST   1.0f // C  - hysterezy 
+//#define VTEMP_REG_HTEMP  18.0f // C - requested heating temperature
+//#define VTEMP_REG_HYST   1.0f // C  - hysterezy 
 #define VTEMP_REG_CTEMP  26.0f // C - requested cooling temperature
 #define VTEMP_REG_CHYST   1.0f // C - hysterezy
 

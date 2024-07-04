@@ -4,6 +4,7 @@
 #include "Global.h" 
 #include "DebugFnc.h"  
 #include "GlStatus.h" 
+#include "Params.h" 
 
 IPAddress BrokerIP(192,168,1,109);     
 char MqttUserName[] = "homeassistant"; 
@@ -22,12 +23,20 @@ Hamqtt DevObj("BMS", nullptr,Hamqtt::PERTYPE_LOWSPEED,"BMS01","DK",SW_VERSION,"0
 void entCallBack(int indOfEnt, String &payload){
   //DEBUG_LOG(true,"entCallBack:indOfEnt= ",indOfEnt);
   DEBUG_LOG(true,"entCallBack:payload= ",payload.c_str());
-  static String value_stat;
+
   const char * entName=DevObj.getEntName(indOfEnt);
   if(strcmp(entName,"Restart")==0){
     ESP.restart();
+    return;
   } 
-    
+  /* part of parameters saving */
+  if((strcmp(entName,"Heat_ReqTemp")==0) ||(strcmp(entName,"Cool_ReqTemp")==0)){
+    int parInd=Params.getIndByName(entName);
+    Params.saveParByInd(parInd,payload.c_str());
+    DevObj.publishValue(entName,Params.readParam(parInd).toFloat());
+    return;
+  }   
+
    // DevObj.publishSwitch("State", Relay,false); 
     
 }
@@ -41,7 +50,6 @@ void Mqtt_init(){
     DevObj.setDynamic(confURL.c_str());
     Hamqtt::init(&Wclient, BrokerIP,MqttUserName,MqttPass,MODEL);
     DEBUG_LOG0(true,"Mqtt init");
-    //DevObj.registerEntity("sensor","Water_Temp",Hamqtt::PERTYPE_NORMAL,"temperature","°C",nullptr,"{{value_json.wTemp}}","mdi:thermometer");
     DevObj.registerSensorEntity("soc",Hamqtt::PERTYPE_LOWSPEED,"battery","%",nullptr,1,true);
     DevObj.registerSensorEntity("state",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1);
     //DevObj.registerSensorEntity("alert",Hamqtt::PERTYPE_NORMAL,nullptr);
@@ -59,6 +67,9 @@ void Mqtt_init(){
 
     DevObj.registerButtonEntity("Restart","restart",entCallBack,nullptr); 
 
+    DevObj.registerNumberEntity("Heat_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,18,12);
+    DevObj.registerNumberEntity("Cool_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,24,29);
+    
     //DEBUG_LOG0(true,"registerEntity");    
 }
 

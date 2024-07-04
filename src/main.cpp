@@ -17,6 +17,7 @@
 #include "GlStatus.h"  
 #include "HFunc.hpp"  
 #include "BatHVAC.hpp"
+#include "Params.h" 
 
 TBMSCom TBMSComobj;  
 Pinger Pinger_;
@@ -58,6 +59,10 @@ void setup() {
   //digitalWrite(RELE_RESERVE_PIN, !RELE_ACTIVELEV); 
 
   Serial.begin(CPUINTERFACE_SPEED);
+
+  if(!Params.init())            // must be the first 
+    Status.gerror.bits.defPar=1;
+
   TBMSComobj.init(&Serial,CPUINTERFACE_SPEED);
 
   DEBUG_PART(Serial.println("Part1 finished..."));

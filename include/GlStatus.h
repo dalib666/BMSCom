@@ -47,6 +47,7 @@ class GLStatusDef{
     struct ErBits{
       uint8_t wifi_com:1;      // not communication with ESP CPU
       uint8_t hRegDeact:1;  // not valid Real time
+      uint8_t defPar:1;      // parameters are in default state
     };
 
     union StatusEr{

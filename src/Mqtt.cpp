@@ -5,12 +5,8 @@
 #include "DebugFnc.h"  
 #include "GlStatus.h" 
 #include "Params.h" 
-
-IPAddress BrokerIP(192,168,1,109);     
-char MqttUserName[] = "homeassistant"; 
-char MqttPass[] = "ol3uuNeek6ke7eich8aiva7ZoxoiVei1aiteith0aighae0ieP7pahFaNgeiP8de";
+   
 #define HW_VERSION "1.0"
-#define MODEL "BatCC01"
 #define EXPIRATION_TIME 3    //[sec] multiplier of parameter "perType" to compute expirtion time  in HA after lost data
 //topics - published
 char ConfURL[]="http://192.168.1.111";
@@ -18,7 +14,7 @@ char ConfURL[]="http://192.168.1.111";
 
 // Initialize the client library
 WiFiClient Wclient;
-Hamqtt DevObj("BMS", nullptr,Hamqtt::PERTYPE_LOWSPEED,"BMS01","DK",SW_VERSION,"001",ConfURL,HW_VERSION,nullptr,EXPIRATION_TIME); //
+Hamqtt DevObj(Params.DevName.c_str(), nullptr,Hamqtt::PERTYPE_LOWSPEED,Params.Model.c_str(),"DK",SW_VERSION,"001",ConfURL,HW_VERSION,nullptr,EXPIRATION_TIME); //
 
 void entCallBack(int indOfEnt, String &payload){
   //DEBUG_LOG(true,"entCallBack:indOfEnt= ",indOfEnt);
@@ -48,7 +44,7 @@ void Mqtt_init(){
     String confURL="http://";
     confURL+=WiFi.localIP().toString();
     DevObj.setDynamic(confURL.c_str());
-    Hamqtt::init(&Wclient, BrokerIP,MqttUserName,MqttPass,MODEL);
+    Hamqtt::init(&Wclient, Params.MqttBrokerIP,Params.MqttUserName.c_str(),Params.MqttPass.c_str(),Params.Identifier.c_str());
     DEBUG_LOG0(true,"Mqtt init");
     DevObj.registerSensorEntity("soc",Hamqtt::PERTYPE_LOWSPEED,"battery","%",nullptr,1,true);
     DevObj.registerSensorEntity("state",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1);
@@ -68,8 +64,9 @@ void Mqtt_init(){
     DevObj.registerButtonEntity("Restart","restart",entCallBack,nullptr); 
 
     DevObj.registerNumberEntity("Heat_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,18,12);
-    DevObj.registerNumberEntity("Cool_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,24,29);
-    
+    DevObj.writeValue("Heat_ReqTemp",Params.Heat_ReqTemp);
+    DevObj.registerNumberEntity("Cool_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,29,24);
+    DevObj.writeValue("Cool_ReqTemp",Params.Cool_ReqTemp);    
     //DEBUG_LOG0(true,"registerEntity");    
 }
 

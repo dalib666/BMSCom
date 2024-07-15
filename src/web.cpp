@@ -11,7 +11,7 @@
 #include "Global.h"
 #include "tbmscom.hpp"
 #include "GlStatus.h" 
-//#include "Params.h" 
+#include "Params.h" 
 #include <ESP8266HTTPUpdateServer.h>
 #include "Global.h"
 //#include <FS.h>
@@ -34,19 +34,18 @@ void handleDiagData();
 void handle_reset();
 void handle_test_temp_control();
 void handle_test_vent_control();
-
+void handle_showP();
+void handleFileUpload();                // upload a new file to the SPIFFS
 /*
 void handleCmd();
 void handle_ext_info();
 void handle_SaveP();
 void handle_setP();
-void handle_showP();
 void handle_setDefP();
 
 
 void handle_help();
 void sendFilePage(String pagefileName);
-void handleFileUpload();                // upload a new file to the SPIFFS
 bool handleFileRead(String path);
 */
 void web_init() {
@@ -60,19 +59,8 @@ void web_init() {
     WebServer.on("/reset",  handle_reset);
     WebServer.on("/tTCtrl", handle_test_temp_control);
     WebServer.on("/tVCtrl", handle_test_vent_control);
-
-    /*
-    WebServer.on("/help", handle_help);
-    WebServer.on("/cmd", handleCmd);
-
-    WebServer.on("/extinfo", handle_ext_info);
-
-    WebServer.on("/saveP",  handle_SaveP);
-    WebServer.on("/setP",  handle_setP);   
     WebServer.on("/showP",  handle_showP); 
-    WebServer.on("/setDefP",  handle_setDefP); 
   
-      
     WebServer.on("/upload", HTTP_GET, []() {                  // if the client requests the upload page
       String s = Update_page;
       WebServer.send(200, "text/html", s);
@@ -82,6 +70,18 @@ void web_init() {
       [](){ WebServer.send(200); },                           // Send status 200 (OK) to tell the client we are ready to receive
       handleFileUpload                                       // Receive and save the file
     );
+
+    /*
+    WebServer.on("/help", handle_help);
+    WebServer.on("/cmd", handleCmd);
+
+    WebServer.on("/extinfo", handle_ext_info);
+
+    WebServer.on("/saveP",  handle_SaveP);
+    WebServer.on("/setP",  handle_setP);   
+
+    WebServer.on("/setDefP",  handle_setDefP); 
+  
     */
 
     HttpUpdater.setup(&WebServer);  // use "/update" dir for update oper
@@ -280,6 +280,43 @@ void handle_test_vent_control(){
   WebServer.send(200, "text/plain", message);
 }
 
+void handle_showP(){
+  String message = "List of params \n"; 
+  for(int i=0; i< Params.getDBSize(); i++){
+    message+=Params.getNameByInd(i); message += " = "; message +=Params.readParam(i); message +="\n";    
+  }
+  WebServer.send(200, "text/plain", message);   
+}
+
+void handleFileUpload(){ // upload a new file to the SPIFFS
+  static File fsUploadFile; 
+  DEBUG_PART(Serial.println("handleFileUpload begin"));
+  HTTPUpload& upload = WebServer.upload();
+  if(upload.status == UPLOAD_FILE_START){
+    String filename = upload.filename;
+    if(!filename.startsWith("/")) filename = "/"+filename;
+    Serial.print("handleFileUpload Name: "); Serial.println(filename);
+    fsUploadFile = SPIFFS.open(filename, "w");            // Open the file for writing in SPIFFS (create if it doesn't exist)
+    filename = String();
+  } else if(upload.status == UPLOAD_FILE_WRITE){
+    if(fsUploadFile)
+      fsUploadFile.write(upload.buf, upload.currentSize); // Write the received bytes to the file
+  } else if(upload.status == UPLOAD_FILE_END){
+    if(fsUploadFile) {                                    // If the file was successfully created
+      fsUploadFile.close();                               // Close the file again
+      Serial.print("handleFileUpload Size: "); Serial.println(upload.totalSize);
+      WebServer.send(200, "text/plain", "File is uploaded.");
+      //WebServer.sendHeader("Location","/success.html");      // Redirect the client to the success page
+      //WebServer.send(303);
+    } else {
+      WebServer.send(500, "text/plain", "500: couldn't create file");
+    }
+  }
+}
+
+
+
+
 /*
 void handleCmd(){
   bool  cmdSuccess=false;
@@ -384,13 +421,7 @@ void handle_setP(){
   WebServer.send(200, "text/plain", message);
 } 
 
-void handle_showP(){
-  String message = "List of params \n"; 
-  for(int i=0; i< NONVOL_PARAMS; i++){
-    message+=ParDB[i].name; message += " = "; message += *ParDB[i].ptr; message +="\n";    
-  }
-  WebServer.send(200, "text/plain", message);   
-}
+
 
 void handle_setDefP(){
   Params_initToDef();
@@ -426,31 +457,6 @@ void sendFilePage(String pagefileName){
   pageF.close();  
 }
  
-void handleFileUpload(){ // upload a new file to the SPIFFS
-  static File fsUploadFile; 
-  DEBUG_PART(Serial.println("handleFileUpload begin"));
-  HTTPUpload& upload = WebServer.upload();
-  if(upload.status == UPLOAD_FILE_START){
-    String filename = upload.filename;
-    if(!filename.startsWith("/")) filename = "/"+filename;
-    Serial.print("handleFileUpload Name: "); Serial.println(filename);
-    fsUploadFile = SPIFFS.open(filename, "w");            // Open the file for writing in SPIFFS (create if it doesn't exist)
-    filename = String();
-  } else if(upload.status == UPLOAD_FILE_WRITE){
-    if(fsUploadFile)
-      fsUploadFile.write(upload.buf, upload.currentSize); // Write the received bytes to the file
-  } else if(upload.status == UPLOAD_FILE_END){
-    if(fsUploadFile) {                                    // If the file was successfully created
-      fsUploadFile.close();                               // Close the file again
-      Serial.print("handleFileUpload Size: "); Serial.println(upload.totalSize);
-      WebServer.send(200, "text/plain", "File is uploaded.");
-      //WebServer.sendHeader("Location","/success.html");      // Redirect the client to the success page
-      //WebServer.send(303);
-    } else {
-      WebServer.send(500, "text/plain", "500: couldn't create file");
-    }
-  }
-}
 
 String getContentType(String filename) { // convert the file extension to the MIME type
   if (filename.endsWith(".html")) return "text/html";

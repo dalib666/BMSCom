@@ -85,6 +85,7 @@ void setup() {
   wifiManager.setConnectTimeout(30);
 
 
+
   //fetches ssid and pass from eeprom and tries to connect
   //if it does not connect it starts an access point with the specified name
   //and goes into a blocking loop awaiting configuration

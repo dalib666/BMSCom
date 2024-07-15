@@ -27,8 +27,8 @@ String ParamsDef::Identifier;        // unique identification of device
 String ParamsDef::Model;     
 
 const ParamsDef::ParamRecord ParDB[]={
-  {"MqttPass",&ParamsDef::Heat_ReqTemp,ParamsDef::DTYPE_FLOAT},
-  {"MqttPass",&ParamsDef::Cool_ReqTemp,ParamsDef::DTYPE_FLOAT},
+  {"Heat_ReqTemp",&ParamsDef::Heat_ReqTemp,ParamsDef::DTYPE_FLOAT},
+  {"Cool_ReqTemp",&ParamsDef::Cool_ReqTemp,ParamsDef::DTYPE_FLOAT},
   {"MqttPass",&ParamsDef::MqttPass,ParamsDef::DTYPE_STRING},
   {"MqttUserName",&ParamsDef::MqttUserName,ParamsDef::DTYPE_STRING},
   {"DevName",&ParamsDef::DevName,ParamsDef::DTYPE_STRING},

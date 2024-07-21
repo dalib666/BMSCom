@@ -41,6 +41,10 @@ void entCallBack(int indOfEnt, String &payload){
 
 void Mqtt_init(){
     
+
+    if(!Params.isValid())
+      return;
+
     String confURL="http://";
     confURL+=WiFi.localIP().toString();
     DevObj.setDynamic(confURL.c_str());
@@ -73,6 +77,8 @@ void Mqtt_init(){
 static bool PublisMqttdata=false;
 void Mqtt_loopQ(void *){
   DebugCntr++;
+  if(!Params.isValid())
+    return;
   if(millis() > 20000ul || PublisMqttdata) {    // to wait some time for valid data from BMS
     PublisMqttdata=true;
     TBMSCom::Data bmsData;
@@ -87,6 +93,8 @@ void Mqtt_loopQ(void *){
 
 
 void Mqtt_loopS(void *){
+  if(!Params.isValid())
+    return;
   if(PublisMqttdata) {
     TBMSCom::Data bmsData;
 
@@ -112,8 +120,8 @@ void Mqtt_loopS(void *){
 
 
 bool MQTT_Check(){
-  //if(!Params::isValid())
-  //  return true;
+  if(!Params.isValid())
+    return true;
   unsigned long lastConTime=DevObj.connected();
   long deltaTime= millis() - lastConTime;
   //DebugCntr=(int)deltaTime;

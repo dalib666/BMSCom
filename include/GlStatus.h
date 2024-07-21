@@ -88,6 +88,8 @@ class GLStatusDef{
       return "Heating regulation is deactivated - heating is switched-off !";
     if(gerror.bits.wifi_com)
       return "Not connected into WIFI";
+    if(gerror.bits.defPar)
+      return "Configuratin parameters are in default state, not valid file was read. ";
     return "";
   }
 

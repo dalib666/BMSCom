@@ -10,6 +10,7 @@
 #include <ESP8266TimerInterrupt.h>
 #include <ardukit.h>
 #include <Pinger.h>
+#include <LittleFS.h>
 #include "hamqtt.hpp"
 #include "web.h"
 #include "Global.h"
@@ -59,6 +60,9 @@ void setup() {
   //digitalWrite(RELE_RESERVE_PIN, !RELE_ACTIVELEV); 
 
   Serial.begin(CPUINTERFACE_SPEED);
+
+  bool statBool = LittleFS.begin();
+  assert(statBool); //An Error has occurred while mounting LittleFS
 
   if(!Params.init())            // must be the first 
     Status.gerror.bits.defPar=1;

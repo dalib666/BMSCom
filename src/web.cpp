@@ -13,6 +13,7 @@
 #include "GlStatus.h" 
 #include "Params.h" 
 #include <ESP8266HTTPUpdateServer.h>
+#include <LittleFS.h>
 #include "Global.h"
 //#include <FS.h>
 
@@ -289,14 +290,14 @@ void handle_showP(){
 }
 
 void handleFileUpload(){ // upload a new file to the SPIFFS
-  static File fsUploadFile; 
-  DEBUG_PART(Serial.println("handleFileUpload begin"));
+ static File fsUploadFile; 
   HTTPUpload& upload = WebServer.upload();
   if(upload.status == UPLOAD_FILE_START){
     String filename = upload.filename;
     if(!filename.startsWith("/")) filename = "/"+filename;
     Serial.print("handleFileUpload Name: "); Serial.println(filename);
-    fsUploadFile = SPIFFS.open(filename, "w");            // Open the file for writing in SPIFFS (create if it doesn't exist)
+    delay(100);  // to be able send info before reset if will happen
+    fsUploadFile = LittleFS.open(filename, "w");            // Open the file for writing in LittleFS (create if it doesn't exist)
     filename = String();
   } else if(upload.status == UPLOAD_FILE_WRITE){
     if(fsUploadFile)

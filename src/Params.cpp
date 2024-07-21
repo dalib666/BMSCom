@@ -52,6 +52,3 @@ void ParamsDef::initToDef(){
     Model.clear();
 }
 
-bool ParamsDef::isValid(){
-  return true; //TBD
-}

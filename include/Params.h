@@ -31,7 +31,6 @@ class ParamsDef: public ParamBase{
     static String Identifier;        // unique identification of device
     static String Model;             // model type identification
 
-    virtual bool isValid();
     virtual void initToDef();
   private:
     //static const ParamRecord ParDB[];

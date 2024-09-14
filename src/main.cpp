@@ -8,7 +8,6 @@
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 #include <ESP8266HTTPClient.h>
 #include <ESP8266TimerInterrupt.h>
-#include <ardukit.h>
 #include <Pinger.h>
 #include <LittleFS.h>
 #include "hamqtt.hpp"
@@ -19,6 +18,7 @@
 #include "HFunc.hpp"  
 #include "BatHVAC.hpp"
 #include "Params.h" 
+#include "DeltaLTime.h"
 
 TBMSCom TBMSComobj;  
 Pinger Pinger_;
@@ -33,12 +33,14 @@ void IRAM_ATTR hwTimerHandler()
   TBMSComobj.period();
 }
 void statusLoop(void *);
-void temp_control(void *);
-void vent_control(void *);
 void checkNetConnection(void *);
 void hystReg(bool heatMode,float in,float low_lev,float high_lev,int out_pin, bool & output);
 
 int Loop_runs_perSec;
+
+DeltaLTime LowLoopTimer;
+DeltaLTime MiddleLoopTimer;
+DeltaLTime HighLoopTimer;
 
 void setup() {
   Serial.begin(CPUINTERFACE_SPEED);
@@ -123,19 +125,15 @@ void setup() {
   }
   Mqtt_init(); 
 
-  adk::set_interval(BatHVAC::process, 1000);           // function call
-  adk::set_interval(Mqtt_loopQ, 1000);           // function call
-  adk::set_interval(Mqtt_loopS, 20000);           // function call
-  adk::set_interval(checkNetConnection, 1000);    //  
-  adk::set_interval(statusLoop, STATUSLOOP_TIME); 
+ // adk::set_interval(BatHVAC::process, 5000);           // function call
 
   while(Serial.available()) {Serial.read();} // clear any chaos before 
   
  
   //delay(5000); //wait for 5 sec to start running
   // Init HW timer
-  bool startStatus = ITimer.attachInterruptInterval(HWTIMER_PERIOD * 1000, hwTimerHandler);
-  assert(startStatus);
+//  bool startStatus = ITimer.attachInterruptInterval(HWTIMER_PERIOD * 1000, hwTimerHandler); Test
+//  assert(startStatus);
   
   
   
@@ -161,7 +159,9 @@ void setup() {
   
   ESP.wdtDisable();   //disable SW WDT to enable HW WDT -->time out is in about 4 sec 
 
-
+  LowLoopTimer.setRef();
+  HighLoopTimer.setRef();
+  MiddleLoopTimer.setRef();
 }
 
 
@@ -170,15 +170,37 @@ uint32_t RX_time[BUFFER_LEN];
 int RX_buffer_IND=0;
 bool startMes = true;
 
+
+
 void loop() {
   static int loop_diag_cntr=0;
   static unsigned long last_mes_time=0;
-  LoopCntr++;
   loop_diag_cntr++;
-  adk::run(); // run ardukit engine
   TBMSComobj.main();
   Hamqtt::main();
   WebServer.handleClient();
+  
+  //***************************** LOW LOOP *************************
+  if(LowLoopTimer.delta()>= LOWLOOP_TIME){ 
+    LowLoopTimer.setRef();
+    LowLoopCntr++;
+    Mqtt_loopS((void *) 0);
+  }
+  //***************************** Middle LOOP *************************
+  if(MiddleLoopTimer.delta()>= MIDLELOOP_TIME){ 
+    MiddleLoopTimer.setRef();
+    LoopCntr++;
+    Mqtt_loopQ((void *) 0);          
+    checkNetConnection((void *) 0);
+    BatHVAC::process((void *) 0);
+  }
+  //***************************** High LOOP *************************
+  if(HighLoopTimer.delta()>= HIGHLOOP_TIME){
+    HighLoopTimer.setRef();
+    HighLoopCntr++;
+    Status.refresh();
+  }
+
   if((millis() - last_mes_time) > 1000){
     Loop_runs_perSec=loop_diag_cntr;
     last_mes_time=millis();
@@ -187,12 +209,11 @@ void loop() {
 
 }
 
-void statusLoop(void *){
-  Status.refresh();
-}
+
 
 
 void checkNetConnection(void *){
+//    DEBUG_PART(Serial.println("checkNetConnection"));
 /*
   if(PingErrCntr >=3){
     
@@ -202,9 +223,10 @@ void checkNetConnection(void *){
 */
   if(millis() < START_TIME_OF_MQTT_MONITORING || MQTT_Check())
     ESP.wdtFeed();  // HW WD do not work
-  else
+  else{
+    DEBUG_LOG0(true,"Restart from MQTT check");  
     ESP.restart();  
-
+  }
 }
 
 

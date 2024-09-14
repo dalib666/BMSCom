@@ -47,8 +47,9 @@ void handle_setDefP();
 
 void handle_help();
 void sendFilePage(String pagefileName);
-bool handleFileRead(String path);
 */
+bool handleFileRead(String path);
+
 void web_init() {
 
   
@@ -93,6 +94,12 @@ void web_init() {
 
 
 void handleNotFound(){
+  String uri = WebServer.uri();
+  if (LittleFS.exists(uri)){
+    handleFileRead(uri);    // try if uri does not mean direct file
+    return;
+  }
+
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += WebServer.uri();
@@ -231,10 +238,9 @@ void handleDiagData() {
   message +="DebugCntr1 = "; message +=DebugCntr1; message +="\n";
   message +="LoopCntr = "; message +=LoopCntr; message +="\n";   
   message +="RunTime = "; message +=(float)millis()/1000.0f; message +="\n";     
- /* message +="LowLoopCntr = "; message +=LowLoopCntr; message +="\n"; 
+  message +="LowLoopCntr = "; message +=LowLoopCntr; message +="\n"; 
   message +="HighLoopCntr = "; message +=HighLoopCntr; message +="\n";
-  message +="ExLowLoopCntr = "; message +=ExLowLoopCntr; message +="\n"; 
-  */
+
   
   WebServer.send(200, "text/plain", message);
 }
@@ -316,6 +322,32 @@ void handleFileUpload(){ // upload a new file to the SPIFFS
 }
 
 
+String getContentType(String filename) { // convert the file extension to the MIME type
+  if (filename.endsWith(".html")) return "text/html";
+  else if (filename.endsWith(".css")) return "text/css";
+  else if (filename.endsWith(".js")) return "application/javascript";
+  else if (filename.endsWith(".ico")) return "image/x-icon";
+  else if (filename.endsWith(".gz")) return "application/x-gzip";
+  return "text/plain";
+}
+
+bool handleFileRead(String path) { // send the right file to the client (if it exists)
+  Serial.println("handleFileRead: " + path);
+  if (path.endsWith("/")) path += "index.html";          // If a folder is requested, send the index file
+  String contentType = getContentType(path);             // Get the MIME type
+  String pathWithGz = path + ".gz";
+  if (LittleFS.exists(pathWithGz) || LittleFS.exists(path)) { // If the file exists, either as a compressed archive, or normal
+    if (LittleFS.exists(pathWithGz))                         // If there's a compressed version available
+      path += ".gz";                                         // Use the compressed verion
+    File file = LittleFS.open(path, "r");                    // Open the file
+    size_t sent = WebServer.streamFile(file, contentType);    // Send it to the client
+    file.close();                                          // Close the file again
+    Serial.println(String("\tSent file: ") + path);
+    return true;
+  }
+  Serial.println(String("\tFile Not Found: ") + path);   // If the file doesn't exist, return false
+  return false;
+}
 
 
 /*
@@ -468,21 +500,5 @@ String getContentType(String filename) { // convert the file extension to the MI
   return "text/plain";
 }
 
-bool handleFileRead(String path) { // send the right file to the client (if it exists)
-  Serial.println("handleFileRead: " + path);
-  if (path.endsWith("/")) path += "index.html";          // If a folder is requested, send the index file
-  String contentType = getContentType(path);             // Get the MIME type
-  String pathWithGz = path + ".gz";
-  if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)) { // If the file exists, either as a compressed archive, or normal
-    if (SPIFFS.exists(pathWithGz))                         // If there's a compressed version available
-      path += ".gz";                                         // Use the compressed verion
-    File file = SPIFFS.open(path, "r");                    // Open the file
-    size_t sent = WebServer.streamFile(file, contentType);    // Send it to the client
-    file.close();                                          // Close the file again
-    Serial.println(String("\tSent file: ") + path);
-    return true;
-  }
-  Serial.println(String("\tFile Not Found: ") + path);   // If the file doesn't exist, return false
-  return false;
-}
+
 */

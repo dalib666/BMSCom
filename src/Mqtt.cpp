@@ -14,7 +14,12 @@ char ConfURL[]="http://192.168.1.111";
 
 // Initialize the client library
 WiFiClient Wclient;
-Hamqtt DevObj(Params.DevName.c_str(), nullptr,Hamqtt::PERTYPE_LOWSPEED,Params.Model.c_str(),"DK",SW_VERSION,"001",ConfURL,HW_VERSION,nullptr,EXPIRATION_TIME); //
+#ifdef TEST_COMP
+  const char * DevIndex="_t";
+#else
+  const char * DevIndex=nullptr;
+#endif
+Hamqtt DevObj(Params.DevName.c_str(), DevIndex,Hamqtt::PERTYPE_LOWSPEED,Params.Model.c_str(),"DK",SW_VERSION,Params.Identifier.c_str(),ConfURL,HW_VERSION,nullptr,EXPIRATION_TIME); //
 
 void entCallBack(int indOfEnt, String &payload){
   //DEBUG_LOG(true,"entCallBack:indOfEnt= ",indOfEnt);
@@ -50,51 +55,52 @@ void Mqtt_init(){
     DevObj.setDynamic(confURL.c_str());
     Hamqtt::init(&Wclient, Params.MqttBrokerIP,Params.MqttUserName.c_str(),Params.MqttPass.c_str(),Params.Identifier.c_str());
     DEBUG_LOG0(true,"Mqtt init");
-    DevObj.registerSensorEntity("soc",Hamqtt::PERTYPE_LOWSPEED,"battery","%",nullptr,1,true);
-    DevObj.registerSensorEntity("state",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1);
-    //DevObj.registerSensorEntity("alert",Hamqtt::PERTYPE_NORMAL,nullptr);
-    DevObj.registerSensorEntity("warning",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1,true);  
-    DevObj.registerSensorEntity("ubat",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);  
-    DevObj.registerSensorEntity("ibat",Hamqtt::PERTYPE_NORMAL,"current","A");  
-    DevObj.registerSensorEntity("tbat",Hamqtt::PERTYPE_LOWSPEED,"temperature","°C",nullptr,TBMSCom::Data::MODUL_NR,true);      
-    DevObj.registerSensorEntity("u_cellMax",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);     
-    DevObj.registerSensorEntity("u_cellMin",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);   
-    DevObj.registerSensorEntity("gl_status",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1,true);   
+    if(Hamqtt::is_connected()){
+      DevObj.registerSensorEntity("soc",Hamqtt::PERTYPE_LOWSPEED,"battery","%",nullptr,1,true);
+      DevObj.registerSensorEntity("state",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1);
+      //DevObj.registerSensorEntity("alert",Hamqtt::PERTYPE_NORMAL,nullptr);
+      DevObj.registerSensorEntity("warning",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1,true);  
+      DevObj.registerSensorEntity("ubat",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);  
+      DevObj.registerSensorEntity("ibat",Hamqtt::PERTYPE_NORMAL,"current","A");  
+      DevObj.registerSensorEntity("tbat",Hamqtt::PERTYPE_LOWSPEED,"temperature","°C",nullptr,TBMSCom::Data::MODUL_NR,true);      
+      DevObj.registerSensorEntity("u_cellMax",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);     
+      DevObj.registerSensorEntity("u_cellMin",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);   
+      DevObj.registerSensorEntity("gl_status",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1,true);   
+
 //    DevObj.registerBinSensorEntity("discharged",Hamqtt::PERTYPE_LOWSPEED,"battery","mdi:battery-alert-variant-outline");   
 
-    DevObj.registerSwitchEntity("Heat",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:heating-coil",nullptr);  
-    DevObj.registerSwitchEntity("Vent",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:hvac",nullptr);  
+      DevObj.registerSwitchEntity("Heat",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:heating-coil",nullptr);  
+      DevObj.registerSwitchEntity("Vent",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:hvac",nullptr);  
 
-    DevObj.registerButtonEntity("Restart","restart",entCallBack,nullptr); 
+      DevObj.registerButtonEntity("Restart","restart",entCallBack,nullptr); 
 
-    DevObj.registerNumberEntity("Heat_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,18,12);
-    DevObj.writeValue("Heat_ReqTemp",Params.Heat_ReqTemp);
-    DevObj.registerNumberEntity("Cool_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,29,24);
-    DevObj.writeValue("Cool_ReqTemp",Params.Cool_ReqTemp);    
+      DevObj.registerNumberEntity("Heat_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,18,12);
+      DevObj.writeValue("Heat_ReqTemp",Params.Heat_ReqTemp);
+      DevObj.registerNumberEntity("Cool_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,29,24);
+      DevObj.writeValue("Cool_ReqTemp",Params.Cool_ReqTemp);    
+    }  
     //DEBUG_LOG0(true,"registerEntity");    
 }
 
 static bool PublisMqttdata=false;
 void Mqtt_loopQ(void *){
-  DebugCntr++;
-  if(!Params.isValid())
-    return;
+  DebugCntr=1;
   if(millis() > 20000ul || PublisMqttdata) {    // to wait some time for valid data from BMS
     PublisMqttdata=true;
     TBMSCom::Data bmsData;
-
+    DebugCntr=2;
     TBMSComobj.getData(&bmsData);
-
+    
     DevObj.publishValue("ibat", bmsData.i_bat); 
     DevObj.publishValue("state", (uint32_t)bmsData.state);   
-//  DevObj.publishBinSen("discharged",TBD); 
+//    DevObj.publishBinSen("discharged",TBD); 
+    
   }    
 }
 
 
 void Mqtt_loopS(void *){
-  if(!Params.isValid())
-    return;
+
   if(PublisMqttdata) {
     TBMSCom::Data bmsData;
 
@@ -125,7 +131,8 @@ bool MQTT_Check(){
   unsigned long lastConTime=DevObj.connected();
   long deltaTime= millis() - lastConTime;
   //DebugCntr=(int)deltaTime;
-  if((millis() < lastConTime) || (deltaTime < 10000l))
+  if((millis() < lastConTime) || (deltaTime < 10000l) || (lastConTime==0))  // return OK after start, if timeout is in limit or, 
+                                                                            // connection never happened - situation, when params are not valid for broker
     return true;
   else
     return false;

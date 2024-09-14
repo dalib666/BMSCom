@@ -30,12 +30,12 @@ namespace BatHVAC{
         float actTemp=(FT_TempControl!=0)? FT_TempControl:TBMSComobj.m_data.t_cellMin;
 
         if(isTempValid(actTemp) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
-            DEBUG_PART(Serial.println("Regulation is runing"));
+            //DEBUG_PART(Serial.println("Regulation is runing"));
             hystReg(true,actTemp,Params.Heat_ReqTemp-TEMP_REG_HYST/2.0f,Params.Heat_ReqTemp+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
             Status.gerror.bits.hRegDeact=false;
         }
         else{
-            DEBUG_PART(Serial.println("Regulation is off"));
+            //DEBUG_PART(Serial.println("Regulation is off"));
             //invalid input data or other cond. not met
             Status.gerror.bits.hRegDeact=false;  
             Rele_heating=false;
@@ -56,7 +56,7 @@ namespace BatHVAC{
 
         if( isTempValid(actMaxTemp)){
 
-            DEBUG_PART(Serial.println("Vent regulation is runing"));
+            //DEBUG_PART(Serial.println("Vent regulation is runing"));
             // ventilation is used only for cooling
             //hystReg(true,actMinTemp,VTEMP_REG_HTEMP-VTEMP_REG_HYST/2.0f,VTEMP_REG_HTEMP+VTEMP_REG_HYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
             hystReg(false,actMaxTemp,Params.Cool_ReqTemp-VTEMP_REG_CHYST/2.0f,Params.Cool_ReqTemp+VTEMP_REG_CHYST/2.0f,RELE_VENTILATION_PIN,Rele_ventilating);
@@ -64,7 +64,7 @@ namespace BatHVAC{
             Status.gwarning.bits.vRegDeact=false;
         }
         else{
-            DEBUG_PART(Serial.println("Regulation is off - ventilation is on all the time."));
+            //DEBUG_PART(Serial.println("Regulation is off - ventilation is on all the time."));
             //invalid input data or other cond. not met
             Status.gwarning.bits.vRegDeact=true;
             Rele_ventilating=true;

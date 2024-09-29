@@ -132,8 +132,8 @@ void setup() {
  
   //delay(5000); //wait for 5 sec to start running
   // Init HW timer
-//  bool startStatus = ITimer.attachInterruptInterval(HWTIMER_PERIOD * 1000, hwTimerHandler); Test
-//  assert(startStatus);
+  bool startStatus = ITimer.attachInterruptInterval(HWTIMER_PERIOD * 1000, hwTimerHandler);
+  assert(startStatus);
   
   
   

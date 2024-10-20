@@ -1,0 +1,10 @@
+{
+    "Heat_ReqTemp" : 13,
+    "Cool_ReqTemp" : 27,
+    "MqttPass" : "ol3uuNeek6ke7eich8aiva7ZoxoiVei1aiteith0aighae0ieP7pahFaNgeiP8de",
+    "MqttUserName" : "homeassistant",
+    "DevName" : "BMS",
+    "Identifier" : "BatCC02Test",
+    "Model" : "BMS01",
+    "MqttBrokerIP" : "192.168.1.109"   
+}

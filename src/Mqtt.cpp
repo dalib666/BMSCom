@@ -10,7 +10,7 @@
 #define EXPIRATION_TIME 3    //[sec] multiplier of parameter "perType" to compute expirtion time  in HA after lost data
 //topics - published
 char ConfURL[]="http://192.168.1.111";
-
+extern ESP8266Timer ITimer;
 
 // Initialize the client library
 WiFiClient Wclient;
@@ -33,8 +33,11 @@ void entCallBack(int indOfEnt, String &payload){
   /* part of parameters saving */
   if((strcmp(entName,"Heat_ReqTemp")==0) ||(strcmp(entName,"Cool_ReqTemp")==0)){
     int parInd=Params.getIndByName(entName);
+    ITimer.disableTimer();
     Params.saveParByInd(parInd,payload.c_str());
     DevObj.publishValue(entName,Params.readParam(parInd).toFloat());
+    delay(10);
+    ITimer.enableTimer();
     return;
   }   
 
@@ -84,11 +87,11 @@ void Mqtt_init(){
 
 static bool PublisMqttdata=false;
 void Mqtt_loopQ(void *){
-  DebugCntr=1;
+
   if(millis() > 20000ul || PublisMqttdata) {    // to wait some time for valid data from BMS
     PublisMqttdata=true;
     TBMSCom::Data bmsData;
-    DebugCntr=2;
+
     TBMSComobj.getData(&bmsData);
     
     DevObj.publishValue("ibat", bmsData.i_bat); 

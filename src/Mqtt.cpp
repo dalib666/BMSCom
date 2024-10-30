@@ -19,7 +19,7 @@ WiFiClient Wclient;
 #else
   const char * DevIndex=nullptr;
 #endif
-Hamqtt DevObj(nullptr, DevIndex,Hamqtt::PERTYPE_LOWSPEED,nullptr,"DK",SW_VERSION,nullptr,nullptr,HW_VERSION,nullptr,EXPIRATION_TIME); //
+Hamqtt DevObj;
 
 void entCallBack(int indOfEnt, String &payload){
   //DEBUG_LOG(true,"entCallBack:indOfEnt= ",indOfEnt);
@@ -56,7 +56,8 @@ void Mqtt_init(){
     String confURL="http://";
     confURL+=WiFi.localIP().toString();
     DEBUG_LOG(true,"Identifier",Params.Identifier.c_str());
-    DevObj.setDynamic(confURL.c_str(),Params.Identifier.c_str(),Params.DevName.c_str(),Params.Model.c_str());
+
+    DevObj.obInit(Params.DevName.c_str(), DevIndex,Hamqtt::PERTYPE_LOWSPEED,Params.Model.c_str(),"DK",SW_VERSION,Params.Identifier.c_str(),confURL.c_str(),HW_VERSION,nullptr,EXPIRATION_TIME);
     Hamqtt::init(&Wclient, Params.MqttBrokerIP,Params.MqttUserName.c_str(),Params.MqttPass.c_str(),Params.Identifier.c_str());
     DEBUG_LOG0(true,"Mqtt init");
     if(Hamqtt::is_connected()){

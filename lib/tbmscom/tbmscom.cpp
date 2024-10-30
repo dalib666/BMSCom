@@ -226,6 +226,8 @@ void TBMSCom::main(){
         if((millis() - m_lastCheckRunTime) > CHECK_RX_TIMEOUT_PERIOD){
             find_u_cellMax();
             find_u_cellMin();
+            if(m_data.u_min != NODATA_FL)
+                m_data.discharged=(m_data.u_cellMin < (m_data.u_min * (1.0f + (float)Data::DIF_U_DISCHARGED)));
             if(millis() > RX_TIMEOUT){
                 m_lastCheckRunTime=millis();
                 unsigned long limitTime=millis() - RX_TIMEOUT;
@@ -298,6 +300,7 @@ void TBMSCom::initData(int frameNumber){
             }
             m_data.u_cellMin=NODATA_FL;
             m_data.u_cellMax=NODATA_FL;
+            m_data.discharged=NODATA_BOOL;
             break;
 
         case 10:
@@ -316,6 +319,7 @@ void TBMSCom::initData(int frameNumber){
             m_data.state=NODATA_UINT16;
             m_data.u_cellMin=NODATA_FL;
             m_data.u_cellMax=NODATA_FL;
+            m_data.discharged=NODATA_BOOL;
             break;    
 
         case 2:
@@ -404,3 +408,4 @@ void TBMSCom::find_u_cellMin(){
     if(fabs(avrVal - min) < 0.05f)
         m_data.u_cellMin=min;
 }
+

@@ -57,6 +57,7 @@ class TBMSCom{
     */ 
     struct Data{
         // AND mask of state signal
+        static const int DIF_U_DISCHARGED=1;  // [%] relative differency of act. cell voltage against u_min to generater discharged signal
         static const int OVERLOADED_MASK= 0x2;  // indication of overloading
         static const int OVERCURRENT_MASK=0x8;       // indication of overcurrent
         static const int OVERDISCHARGED_MASK=0x10;   // indication of very discharged battery
@@ -107,6 +108,7 @@ class TBMSCom{
         uint16_t    lcd_state;    
         const char * warning;
         const char * fault;
+        bool discharged;
     }m_data;
     
     void main();    

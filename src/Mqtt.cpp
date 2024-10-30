@@ -19,7 +19,7 @@ WiFiClient Wclient;
 #else
   const char * DevIndex=nullptr;
 #endif
-Hamqtt DevObj(Params.DevName.c_str(), DevIndex,Hamqtt::PERTYPE_LOWSPEED,Params.Model.c_str(),"DK",SW_VERSION,Params.Identifier.c_str(),ConfURL,HW_VERSION,nullptr,EXPIRATION_TIME); //
+Hamqtt DevObj(nullptr, DevIndex,Hamqtt::PERTYPE_LOWSPEED,nullptr,"DK",SW_VERSION,nullptr,nullptr,HW_VERSION,nullptr,EXPIRATION_TIME); //
 
 void entCallBack(int indOfEnt, String &payload){
   //DEBUG_LOG(true,"entCallBack:indOfEnt= ",indOfEnt);
@@ -55,7 +55,8 @@ void Mqtt_init(){
 
     String confURL="http://";
     confURL+=WiFi.localIP().toString();
-    DevObj.setDynamic(confURL.c_str());
+    DEBUG_LOG(true,"Identifier",Params.Identifier.c_str());
+    DevObj.setDynamic(confURL.c_str(),Params.Identifier.c_str(),Params.DevName.c_str(),Params.Model.c_str());
     Hamqtt::init(&Wclient, Params.MqttBrokerIP,Params.MqttUserName.c_str(),Params.MqttPass.c_str(),Params.Identifier.c_str());
     DEBUG_LOG0(true,"Mqtt init");
     if(Hamqtt::is_connected()){
@@ -70,7 +71,7 @@ void Mqtt_init(){
       DevObj.registerSensorEntity("u_cellMin",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);   
       DevObj.registerSensorEntity("gl_status",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1,true);   
 
-//    DevObj.registerBinSensorEntity("discharged",Hamqtt::PERTYPE_LOWSPEED,"battery","mdi:battery-alert-variant-outline");   
+      DevObj.registerBinSensorEntity("discharged",Hamqtt::PERTYPE_NORMAL,"battery","mdi:battery-alert-variant-outline");   
 
       DevObj.registerSwitchEntity("Heat",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:heating-coil",nullptr);  
       DevObj.registerSwitchEntity("Vent",Hamqtt::PERTYPE_LOWSPEED,"switch","mdi:hvac",nullptr);  
@@ -81,6 +82,7 @@ void Mqtt_init(){
       DevObj.writeValue("Heat_ReqTemp",Params.Heat_ReqTemp);
       DevObj.registerNumberEntity("Cool_ReqTemp",Hamqtt::PERTYPE_LOWSPEED,nullptr,"°C","mdi:temperature-celsius",entCallBack,false,29,24);
       DevObj.writeValue("Cool_ReqTemp",Params.Cool_ReqTemp);    
+      //DevObj.registerSwitchEntity("Discharged",Hamqtt::PERTYPE_NORMAL,"switch","mdi:battery-outline",nullptr);  
     }  
     //DEBUG_LOG0(true,"registerEntity");    
 }
@@ -96,7 +98,7 @@ void Mqtt_loopQ(void *){
     
     DevObj.publishValue("ibat", bmsData.i_bat); 
     DevObj.publishValue("state", (uint32_t)bmsData.state);   
-//    DevObj.publishBinSen("discharged",TBD); 
+    DevObj.publishBinSen("discharged",bmsData.discharged); 
     
   }    
 }

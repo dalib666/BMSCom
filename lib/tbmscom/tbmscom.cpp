@@ -16,7 +16,7 @@
 #define SW_STATE_MASK 0x80
 
 extern int DebugCntr;
-
+extern int DebugCntr1;
 
 bool  TBMSCom::b_to_w_be_check(int framenumber,float & dataItem,uint8_t *buf,int ind,float scale,float rangeL,float rangeH, float checkdif){
     bool status = false;
@@ -226,8 +226,10 @@ void TBMSCom::main(){
         if((millis() - m_lastCheckRunTime) > CHECK_RX_TIMEOUT_PERIOD){
             find_u_cellMax();
             find_u_cellMin();
-            if(m_data.u_min != NODATA_FL)
-                m_data.discharged=(m_data.u_cellMin < (m_data.u_min * (1.0f + (float)Data::DIF_U_DISCHARGED)));
+            if(m_data.u_min != NODATA_FL){
+                float u_min_test=m_data.u_min * (1.0f + (float)Data::DIF_U_DISCHARGED/100.0f);
+                m_data.discharged=(m_data.u_cellMin < u_min_test);
+            }
             if(millis() > RX_TIMEOUT){
                 m_lastCheckRunTime=millis();
                 unsigned long limitTime=millis() - RX_TIMEOUT;

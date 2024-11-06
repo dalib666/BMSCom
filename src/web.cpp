@@ -162,6 +162,8 @@ void handleRoot() {
   
   //TBMSComobj.m_data.state.bit.unknown1=1;
   addOneLine(message, "state=",TBMSComobj.m_data.state);
+  addOneLine(message, "discharged=",TBMSComobj.m_data.discharged);
+
 
   for(int ind=0; ind < TBMSCom::Data::U_CELL_NR; ind++ ){
 

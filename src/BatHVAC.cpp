@@ -25,12 +25,11 @@ namespace BatHVAC{
 
     void temp_control(){  
 
-        //ESP.wdtFeed();
 
         float actTemp=(FT_TempControl!=0)? FT_TempControl:TBMSComobj.m_data.t_cellMin;
 
-        if(isTempValid(actTemp) && (TBMSComobj.m_data.u_min > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_min < 5.0f)){
-            //DEBUG_PART(Serial.println("Regulation is runing"));
+        if(isTempValid(actTemp) && (TBMSComobj.m_data.u_cellMin > CELL_CRIT_VALUE) && (TBMSComobj.m_data.u_cellMin < 5.0f)){
+            //DEBUG_LOG(true,"actTemp=",actTemp);
             hystReg(true,actTemp,Params.Heat_ReqTemp-TEMP_REG_HYST/2.0f,Params.Heat_ReqTemp+TEMP_REG_HYST/2.0f,RELE_HEATING_PIN,Rele_heating);
             Status.gerror.bits.hRegDeact=false;
         }

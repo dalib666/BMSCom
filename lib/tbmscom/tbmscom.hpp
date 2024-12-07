@@ -69,6 +69,7 @@ class TBMSCom{
         static const int MODUL_NR=8; // max number of battery moduls
         static const int FRAMES_NR=18;
         static const int FRAMES_MAXNR=FRAMES_NR-1;
+        static const int WARNING_MAX_LEN=30;
         int frameErCntr[FRAMES_NR];    // er. counters of Rx frames
         int frameRxCntr[FRAMES_NR];    // counters of valid  Rx frames
         unsigned long frameRxTime[FRAMES_NR]; // time of last valid Rx frame
@@ -107,7 +108,7 @@ class TBMSCom{
         uint16_t    ch_dsch_state;  
         uint16_t    lcd_state;    
         const char * warning;
-        const char * fault;
+        //const char * fault;
         bool discharged;
     }m_data;
     

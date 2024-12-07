@@ -64,7 +64,7 @@ void Mqtt_init(){
       DevObj.registerSensorEntity("soc",Hamqtt::PERTYPE_LOWSPEED,"battery","%",nullptr,1,true);
       DevObj.registerSensorEntity("state",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1);
       //DevObj.registerSensorEntity("alert",Hamqtt::PERTYPE_NORMAL,nullptr);
-      DevObj.registerSensorEntity("warning",Hamqtt::PERTYPE_LOWSPEED,nullptr,"-",nullptr,1,true);  
+      DevObj.registerTextEntity("warning",Hamqtt::PERTYPE_LOWSPEED,nullptr,nullptr,nullptr,"diagnostic",1,false,TBMSCom::Data::WARNING_MAX_LEN);  
       DevObj.registerSensorEntity("ubat",Hamqtt::PERTYPE_LOWSPEED,"voltage","V",nullptr,1,true);  
       DevObj.registerSensorEntity("ibat",Hamqtt::PERTYPE_NORMAL,"current","A");  
       DevObj.registerSensorEntity("tbat",Hamqtt::PERTYPE_LOWSPEED,"temperature","°C",nullptr,TBMSCom::Data::MODUL_NR,true);      

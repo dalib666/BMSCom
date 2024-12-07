@@ -138,6 +138,7 @@ void handleRoot() {
   addOneLine(message, "GlStatus",Status.mStatus, "");
   addOneLine(message, "GlError",Status.getErrorStr(), "");
   addOneLine(message, "GlWarning",Status.getWarningStr(), "");
+  addOneLine(message, "BMS-Warning",TBMSComobj.m_data.warning, "");
   addOneLine(message, "Rele_heating",Rele_heating, "");
   addOneLine(message, "Rele_ventilating",Rele_ventilating, "");
   addOneLine(message, "u_min",TBMSComobj.m_data.u_min, "V");

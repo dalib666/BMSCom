@@ -227,7 +227,8 @@ void TBMSCom::main(){
             find_u_cellMax();
             find_u_cellMin();
             if(m_data.u_min != NODATA_FL){
-                float u_min_test=m_data.u_min * (1.0f + (float)Data::DIF_U_DISCHARGED/100.0f);
+                //float u_min_test=m_data.u_min * (1.0f + (float)Data::DIF_U_DISCHARGED/100.0f);
+                float u_min_test=3.36f; //only test
                 m_data.discharged=(m_data.u_cellMin < u_min_test);
             }
             if(millis() > RX_TIMEOUT){
@@ -302,7 +303,7 @@ void TBMSCom::initData(int frameNumber){
             }
             m_data.u_cellMin=NODATA_FL;
             m_data.u_cellMax=NODATA_FL;
-            m_data.discharged=NODATA_BOOL;
+            m_data.discharged=false;
             break;
 
         case 10:
@@ -321,7 +322,8 @@ void TBMSCom::initData(int frameNumber){
             m_data.state=NODATA_UINT16;
             m_data.u_cellMin=NODATA_FL;
             m_data.u_cellMax=NODATA_FL;
-            m_data.discharged=NODATA_BOOL;
+            m_data.discharged=false;
+            m_data.warning="no warning";
             break;    
 
         case 2:

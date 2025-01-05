@@ -14,7 +14,7 @@
 #include "tbmscom.hpp"
 
 
-#define SW_VERSION  "V1.6.2"
+#define SW_VERSION  "V1.6.3"
 #define COMP_DATE __DATE__;
 #define COMP_TIME __TIME__;
 #define MIDLELOOP_TIME 1000

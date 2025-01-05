@@ -8,7 +8,7 @@
 
 #include "tbmscom.hpp"
 #include "assert.h"
-
+#include "DebugFnc.h"
 
 #define b_to_w_be(buf,ind_) (buf[ind_]<<8 | buf[ind_+1])
 
@@ -130,13 +130,15 @@ void TBMSCom::main(){
                             break;
 
                         if(m_data.state & Data::OVERDISCHARGED_MASK)
-                            m_data.warning="Batery is very discharged";
+                            //remember that length of warning string must to be coverd by WARNING_MAX_LEN !!!
+                            m_data.warning="Batery is very discharged"; 
                         else
                         //if(m_data.state.bit.discharged)
                         //    m_data.warning="Batery is discharged";
                         //else    
                         if(!(m_data.state & SW_STATE_MASK))
-                            m_data.warning="Batery is disconnected from FV inverter";
+                            //remember that length of warning string must to be coverd by WARNING_MAX_LEN !!!
+                            m_data.warning="Batery is disconnected from FV inverter"; 
                         else
                             m_data.warning="no warning";
                         /*    
@@ -227,8 +229,7 @@ void TBMSCom::main(){
             find_u_cellMax();
             find_u_cellMin();
             if(m_data.u_min != NODATA_FL){
-                //float u_min_test=m_data.u_min * (1.0f + (float)Data::DIF_U_DISCHARGED/100.0f);
-                float u_min_test=3.36f; //only test
+                float u_min_test=m_data.u_min * (1.0f + (float)Data::DIF_U_DISCHARGED/100.0f);
                 m_data.discharged=(m_data.u_cellMin < u_min_test);
             }
             if(millis() > RX_TIMEOUT){
@@ -269,6 +270,7 @@ void TBMSCom::period(){
 }
 
 void TBMSCom::initAllData(){
+
     for(int ind=0;ind<Data::FRAMES_NR;ind++)
         initData(ind);
 }

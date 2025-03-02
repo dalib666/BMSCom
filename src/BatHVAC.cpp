@@ -50,6 +50,7 @@ namespace BatHVAC{
 
         if(Rele_heating){
             digitalWrite(RELE_VENTILATION_PIN, !RELE_ACTIVELEV);    
+            Rele_ventilating=false;
             return;     // if heating is on - always disable venting
         }
 
